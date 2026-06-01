@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AnyLLM — BYOK LLM configuration for Swift</title>
+<meta name="description" content="A Swift Package that gives any iOS, iPadOS, or macOS app a production-grade Bring-Your-Own-Key (BYOK) LLM configuration experience in one line.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fbfbfd; --fg:#15151b; --muted:#6a6a78; --line:#e9e9f1;
+    --card:#ffffff; --accent:#5b5bd6; --accent2:#7c5cff; --teal:#10a37f;
+    --code-bg:#1a1b26; --code-fg:#c3c8e0; --shadow:0 1px 2px rgba(20,20,40,.04),0 8px 30px rgba(20,20,40,.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0c0c12; --fg:#ececf3; --muted:#9a9aac; --line:#22232e;
+      --card:#14141d; --code-bg:#0a0a10; --code-fg:#c3c8e0; --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 40px rgba(0,0,0,.35); }
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--fg);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.875em}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  .section{padding:80px 0}
+  h2{font-size:2rem;font-weight:800;letter-spacing:-.02em;margin-bottom:8px}
+  h3{font-size:1.1rem;font-weight:700;margin-bottom:6px}
+  .sub{color:var(--muted);font-size:1.05rem;margin-bottom:40px;max-width:680px}
+
+  /* nav */
+  nav{position:sticky;top:0;z-index:50;backdrop-filter:saturate(180%) blur(14px);
+    background:color-mix(in srgb,var(--bg) 80%,transparent);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;font-size:1.1rem}
+  .logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:grid;place-items:center;color:#fff;font-weight:800;font-size:.8rem;box-shadow:0 4px 12px rgba(91,91,214,.35)}
+  .nav-links{display:flex;gap:24px;align-items:center;font-size:.92rem;font-weight:500}
+  .nav-links a{color:var(--fg)}
+  @media(max-width:640px){.nav-links a:not(.btn){display:none}}
+
+  /* hero */
+  .hero{padding:88px 0 64px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:"";position:absolute;inset:0;background:
+    radial-gradient(60% 50% at 50% 0%,rgba(124,92,255,.16),transparent 70%);z-index:-1}
+  .badge-pill{display:inline-flex;gap:8px;align-items:center;padding:6px 14px;border:1px solid var(--line);
+    border-radius:100px;font-size:.82rem;color:var(--muted);background:var(--card);margin-bottom:24px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--teal)}
+  .hero h1{font-size:clamp(2.4rem,6vw,4rem);font-weight:800;letter-spacing:-.035em;line-height:1.05;margin-bottom:18px}
+  .hero h1 .grad{background:linear-gradient(120deg,var(--accent),var(--accent2) 60%,var(--teal));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .hero p.lead{font-size:1.2rem;color:var(--muted);max-width:640px;margin:0 auto 32px}
+  .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:11px;font-weight:600;font-size:.95rem;
+    border:1px solid transparent;cursor:pointer;transition:transform .12s ease, box-shadow .12s ease}
+  .btn:hover{text-decoration:none;transform:translateY(-1px)}
+  .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 6px 20px rgba(91,91,214,.35)}
+  .btn-ghost{background:var(--card);color:var(--fg);border-color:var(--line)}
+  .badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:28px}
+  .badges img{height:22px}
+
+  /* shots */
+  .shots{display:flex;gap:18px;justify-content:center;margin-top:56px;flex-wrap:wrap}
+  .shots img{width:230px;border-radius:22px;border:1px solid var(--line);box-shadow:var(--shadow)}
+  @media(max-width:640px){.shots img{width:150px}}
+
+  /* feature grid */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;box-shadow:var(--shadow)}
+  .card .ic{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-size:1.2rem;margin-bottom:14px;
+    background:color-mix(in srgb,var(--accent) 12%,transparent)}
+  .card p{color:var(--muted);font-size:.95rem}
+
+  /* code */
+  pre{background:var(--code-bg);color:var(--code-fg);border-radius:14px;padding:22px;overflow:auto;
+    font-family:'JetBrains Mono',monospace;font-size:.86rem;line-height:1.7;border:1px solid rgba(255,255,255,.06)}
+  pre .k{color:#bb9af7}.pre .t{color:#7dcfff} pre .s{color:#9ece6a} pre .c{color:#565f89} pre .f{color:#7aa2f7}
+  .muted-bg{background:color-mix(in srgb,var(--accent) 4%,var(--bg))}
+
+  /* providers */
+  .prov{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+  .pill{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;
+    background:var(--card);font-weight:600;font-size:.9rem}
+  .sw{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;color:#fff;font-size:.7rem;font-weight:700;flex:none}
+
+  /* table */
+  table{width:100%;border-collapse:collapse;font-size:.92rem}
+  th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line)}
+  th{font-weight:700;color:var(--muted);font-size:.82rem;text-transform:uppercase;letter-spacing:.04em}
+  td code{color:var(--accent)}
+
+  footer{border-top:1px solid var(--line);padding:40px 0;text-align:center;color:var(--muted);font-size:.9rem}
+  .kicker{font-size:.8rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand"><span class="logo">LLM</span> AnyLLM</div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#start">Quick Start</a>
+      <a href="#providers">Providers</a>
+      <a href="#architecture">Architecture</a>
+      <a class="btn btn-ghost" href="https://github.com/everettjf/AnyLLM">GitHub ↗</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="badge-pill"><span class="dot"></span> iOS · iPadOS · macOS &nbsp;·&nbsp; Swift 6.1</div>
+    <h1>Bring Your Own Key,<br><span class="grad">beautifully.</span></h1>
+    <p class="lead">A Swift Package that gives any Apple-platform app a production-grade
+      LLM provider configuration experience — onboarding, key validation, connection
+      testing, Keychain storage — in <strong>one line</strong>.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="#start">Get Started</a>
+      <a class="btn btn-ghost" href="https://github.com/everettjf/AnyLLM">View on GitHub</a>
+    </div>
+    <div class="badges">
+      <img alt="platforms" src="https://img.shields.io/badge/platforms-iOS%2017%20·%20iPadOS%2017%20·%20macOS%2014-blue">
+      <img alt="swift" src="https://img.shields.io/badge/Swift-6.1-fa7343">
+      <img alt="spm" src="https://img.shields.io/badge/SwiftPM-compatible-brightgreen">
+      <img alt="license" src="https://img.shields.io/badge/license-MIT-black">
+    </div>
+    <div class="shots">
+      <img src="assets/screen-list.png" alt="Providers list">
+      <img src="assets/screen-form.png" alt="Configuration form">
+      <img src="assets/screen-onboarding.png" alt="Get-a-key onboarding guide">
+    </div>
+  </div>
+</header>
+
+<section class="section muted-bg" id="why">
+  <div class="wrap">
+    <div class="kicker">Why AnyLLM</div>
+    <h2>The hard part isn't calling models. It's the config UX.</h2>
+    <p class="sub">Plenty of great libraries call LLM APIs. But every BYOK app re-builds the same
+      provider list, key field, "where do I get a key?" guidance, Keychain plumbing, and connection
+      test by hand. AnyLLM ships all of it as polished, themeable SwiftUI — and keeps the model
+      calls behind a swappable protocol.</p>
+  </div>
+</section>
+
+<section class="section" id="features">
+  <div class="wrap">
+    <div class="kicker">Features</div>
+    <h2>Everything a key picker needs</h2>
+    <p class="sub">Drop in the whole settings center, or compose the pieces you want.</p>
+    <div class="grid">
+      <div class="card"><div class="ic">⚡️</div><h3>One-line settings center</h3>
+        <p>List, add, edit, reorder, delete, and choose the active provider — <code>AnyLLMSettingsView()</code>.</p></div>
+      <div class="card"><div class="ic">🧭</div><h3>Per-provider onboarding</h3>
+        <p>Structured "get a key" guide with steps, caveats, and deep links to console, sign-up, docs, and pricing.</p></div>
+      <div class="card"><div class="ic">🔒</div><h3>Secure by default</h3>
+        <p>Keys go to the Keychain. The UI masks them. "Test Connection" uses a minimal request.</p></div>
+      <div class="card"><div class="ic">🗂️</div><h3>Data-driven catalog</h3>
+        <p>Add a provider by editing <code>providers.json</code> — no UI code. Built-in, optionally overridden via remote OTA.</p></div>
+      <div class="card"><div class="ic">🔌</div><h3>Swappable engine</h3>
+        <p><code>DefaultLLMClient</code> speaks OpenAI, Anthropic, Gemini &amp; Ollama with zero dependencies. Conform to <code>LLMClient</code> for anything else.</p></div>
+      <div class="card"><div class="ic">📱</div><h3>Adaptive &amp; themeable</h3>
+        <p>Looks right on iPhone, iPad, and Mac. Match the host app with one theme modifier.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section muted-bg" id="start">
+  <div class="wrap">
+    <div class="kicker">Quick Start</div>
+    <h2>Two steps to a full BYOK screen</h2>
+    <p class="sub">Add the package, then render the settings view. That's it.</p>
+    <h3 style="margin:24px 0 10px">1 · Add the package</h3>
+<pre><span class="c">// Package.swift</span>
+.<span class="f">package</span>(url: <span class="s">"https://github.com/everettjf/AnyLLM"</span>, from: <span class="s">"1.0.0"</span>)</pre>
+    <h3 style="margin:28px 0 10px">2 · Show the settings center</h3>
+<pre><span class="k">import</span> AnyLLM
+
+<span class="k">struct</span> SettingsScreen: <span class="t">View</span> {
+    <span class="k">var</span> body: <span class="k">some</span> <span class="t">View</span> {
+        <span class="t">AnyLLMSettingsView</span>()
+            .<span class="f">environmentObject</span>(store)              <span class="c">// a ConfigurationStore</span>
+            .<span class="f">anyLLMClient</span>(<span class="t">DefaultLLMClient</span>())     <span class="c">// or your own LLMClient</span>
+    }
+}</pre>
+    <h3 style="margin:28px 0 10px">Send a request with the active config</h3>
+<pre><span class="k">if let</span> config = store.activeConfiguration,
+   <span class="k">let</span> provider = <span class="k">await</span> <span class="t">ProviderRegistry</span>.shared.<span class="f">provider</span>(config.providerID) {
+    <span class="k">let</span> resolved = <span class="t">ResolvedConfiguration</span>(
+        provider: provider,
+        configuration: config,
+        apiKey: store.<span class="f">apiKey</span>(for: config.id)
+    )
+    <span class="k">let</span> response = <span class="k">try await</span> <span class="t">DefaultLLMClient</span>().<span class="f">complete</span>(.<span class="f">text</span>(<span class="s">"Hello"</span>), with: resolved)
+    <span class="f">print</span>(response.text)
+}</pre>
+  </div>
+</section>
+
+<section class="section" id="providers">
+  <div class="wrap">
+    <div class="kicker">Built-in</div>
+    <h2>10 providers, ready out of the box</h2>
+    <p class="sub">Each ships with brand styling, key validation, model presets, and a full onboarding guide.</p>
+    <div class="prov">
+      <div class="pill"><span class="sw" style="background:#10a37f">AI</span> OpenAI</div>
+      <div class="pill"><span class="sw" style="background:#d97757">AN</span> Anthropic</div>
+      <div class="pill"><span class="sw" style="background:#4285f4">GG</span> Gemini</div>
+      <div class="pill"><span class="sw" style="background:#4d6bfe">DS</span> DeepSeek</div>
+      <div class="pill"><span class="sw" style="background:#6467f2">OR</span> OpenRouter</div>
+      <div class="pill"><span class="sw" style="background:#f55036">GQ</span> Groq</div>
+      <div class="pill"><span class="sw" style="background:#fa520f">MS</span> Mistral</div>
+      <div class="pill"><span class="sw" style="background:#111">xAI</span> Grok</div>
+      <div class="pill"><span class="sw" style="background:#0a0a0a">OL</span> Ollama</div>
+      <div class="pill"><span class="sw" style="background:#6e7781">API</span> Custom</div>
+    </div>
+  </div>
+</section>
+
+<section class="section muted-bg" id="architecture">
+  <div class="wrap">
+    <div class="kicker">Architecture</div>
+    <h2>Layered, so you take only what you need</h2>
+    <p class="sub"><code>AnyLLMCore</code> has zero third-party dependencies. Nothing pulls in a heavy SDK unless you choose to.</p>
+    <div class="card" style="padding:6px 8px">
+    <table>
+      <tr><th>Target</th><th>Role</th><th>Depends on</th></tr>
+      <tr><td><code>AnyLLMCore</code></td><td>Models, registry, onboarding metadata, providers.json</td><td>—</td></tr>
+      <tr><td><code>AnyLLMStore</code></td><td>Keychain credentials + configuration persistence</td><td>Core</td></tr>
+      <tr><td><code>AnyLLMClient</code></td><td>LLMClient protocol + DefaultLLMClient (URLSession)</td><td>Core</td></tr>
+      <tr><td><code>AnyLLMUI</code></td><td>SwiftUI components</td><td>Core · Store · Client</td></tr>
+      <tr><td><code>AnyLLM</code></td><td>Umbrella re-export</td><td>all</td></tr>
+    </table>
+    </div>
+    <p class="sub" style="margin-top:28px">Reusable public components: <code>ProviderPickerView</code>,
+      <code>ProviderConfigForm</code>, <code>OnboardingGuideView</code>, <code>ConnectionTestButton</code>,
+      <code>KeyField</code>, <code>ProviderBadge</code>.</p>
+  </div>
+</section>
+
+<section class="section" id="ipad">
+  <div class="wrap" style="text-align:center">
+    <div class="kicker">One codebase</div>
+    <h2 style="margin-bottom:28px">Adaptive on every screen</h2>
+    <img src="assets/screen-ipad.png" alt="iPad layout" style="width:100%;max-width:760px;border-radius:18px;border:1px solid var(--line);box-shadow:var(--shadow)">
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p><strong>AnyLLM</strong> — MIT licensed · Built with <a href="https://github.com/everettjf/AnyLLM">everettjf/AnyLLM</a></p>
+    <p style="margin-top:6px">Crafted for the Apple platforms BYOK ecosystem.</p>
+  </div>
+</footer>
+
+</body>
+</html>
