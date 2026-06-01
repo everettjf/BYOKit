@@ -62,6 +62,96 @@ public struct AnyLanguageModelClient: LLMClient {
         }
     }
 
+    public func streamComplete(_ request: CompletionRequest, with resolved: ResolvedConfiguration) -> AsyncThrowingStream<String, Error> {
+        switch resolved.provider.id {
+        case .appleFoundation:
+            return streamAppleFoundationModels(request)
+        case .mlx:
+            #if MLX
+            guard let id = resolved.modelID, !id.isEmpty else { return errorStream(.missingModel) }
+            return streamRun(request, on: MLXLanguageModel(modelId: id))
+            #else
+            return errorStream(.unsupported("MLX support is not enabled. Add the \"MLX\" trait to your BYOKit dependency."))
+            #endif
+        case .llama:
+            #if Llama
+            let path = resolved.configuration.extraValues[byokLlamaModelPathField] ?? ""
+            guard !path.isEmpty else { return errorStream(.missingModel) }
+            return streamRun(request, on: LlamaLanguageModel(modelPath: path))
+            #else
+            return errorStream(.unsupported("llama.cpp support is not enabled. Add the \"Llama\" trait to your BYOKit dependency."))
+            #endif
+        default:
+            return fallback.streamComplete(request, with: resolved)
+        }
+    }
+
+    /// A stream that immediately fails with the given error.
+    private func errorStream(_ error: LLMClientError) -> AsyncThrowingStream<String, Error> {
+        AsyncThrowingStream { $0.finish(throwing: error) }
+    }
+
+    private func streamAppleFoundationModels(_ request: CompletionRequest) -> AsyncThrowingStream<String, Error> {
+        #if canImport(FoundationModels)
+        if #available(iOS 26.0, macOS 26.0, *) {
+            let model = SystemLanguageModel.default
+            guard case .available = model.availability else {
+                return errorStream(.unsupported("Apple Intelligence is not available on this device."))
+            }
+            return streamSession(request, makeSession: { system in
+                system.isEmpty ? LanguageModelSession(model: model) : LanguageModelSession(model: model, instructions: system)
+            })
+        } else {
+            return errorStream(.unsupported("Apple Foundation Models require a newer OS version."))
+        }
+        #else
+        return errorStream(.unsupported("This build was compiled without Foundation Models support."))
+        #endif
+    }
+
+    /// Streams a prompt through any AnyLanguageModel model, converting the SDK's
+    /// cumulative snapshots into incremental deltas.
+    private func streamRun<M: LanguageModel>(_ request: CompletionRequest, on model: M) -> AsyncThrowingStream<String, Error> {
+        streamSession(request, makeSession: { system in
+            system.isEmpty ? LanguageModelSession(model: model) : LanguageModelSession(model: model, instructions: system)
+        })
+    }
+
+    private func streamSession(_ request: CompletionRequest, makeSession: @escaping @Sendable (String) -> LanguageModelSession) -> AsyncThrowingStream<String, Error> {
+        let system = request.messages.filter { $0.role == .system }.map(\.content).joined(separator: "\n\n")
+        let userText = request.messages.filter { $0.role != .system }.map(\.content).joined(separator: "\n\n")
+        return AsyncThrowingStream { continuation in
+            let task = Task {
+                do {
+                    let session = makeSession(system)
+                    // The SDK's String streaming requires `String: Generable`, which
+                    // is macOS/iOS 26+ only. On older OSes, fall back to one shot.
+                    if #available(iOS 26.0, macOS 26.0, *) {
+                        var previous = ""
+                        for try await snapshot in session.streamResponse(to: userText) {
+                            // Snapshots are cumulative; emit only the new suffix.
+                            let current = snapshot.content
+                            if current.hasPrefix(previous) {
+                                let delta = String(current.dropFirst(previous.count))
+                                if !delta.isEmpty { continuation.yield(delta) }
+                            } else if !current.isEmpty {
+                                continuation.yield(current)
+                            }
+                            previous = current
+                        }
+                    } else {
+                        let response = try await session.respond(to: userText)
+                        if !response.content.isEmpty { continuation.yield(response.content) }
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
+
     // MARK: - Native readiness / models
 
     private func nativeReadiness(_ resolved: ResolvedConfiguration) -> (ok: Bool, message: String) {

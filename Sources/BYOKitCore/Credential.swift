@@ -39,16 +39,16 @@ public struct KeyValidation: Hashable, Sendable, Codable {
     /// Returns `nil` if the trimmed key looks structurally valid, otherwise a reason.
     public func reasonInvalid(for rawKey: String) -> String? {
         let key = rawKey.trimmingCharacters(in: .whitespacesAndNewlines)
-        if key.isEmpty { return "The key is empty." }
+        if key.isEmpty { return L("The key is empty.") }
         if let prefix, !prefix.isEmpty, !key.hasPrefix(prefix) {
-            return "Expected the key to start with \"\(prefix)\"."
+            return L("Expected the key to start with \"\(prefix)\".")
         }
         if let minLength, key.count < minLength {
-            return "The key looks too short."
+            return L("The key looks too short.")
         }
         if let regex, !regex.isEmpty {
             if key.range(of: regex, options: .regularExpression) == nil {
-                return "The key format doesn't look right."
+                return L("The key format doesn't look right.")
             }
         }
         return nil

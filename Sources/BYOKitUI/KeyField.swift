@@ -59,7 +59,7 @@ public struct KeyField: View {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundStyle(.green)
                         .transition(.opacity)
-                        .accessibilityLabel("Key looks valid")
+                        .accessibilityLabel(L("Key looks valid"))
                 }
 
                 Button {
@@ -68,7 +68,7 @@ public struct KeyField: View {
                     Image(systemName: isRevealed ? "eye.slash" : "eye")
                 }
                 .buttonStyle(.borderless)
-                .accessibilityLabel(isRevealed ? "Hide key" : "Show key")
+                .accessibilityLabel(isRevealed ? L("Hide key") : L("Show key"))
 
                 if Platform.supportsPasteboardReads {
                     Button {
@@ -79,7 +79,7 @@ public struct KeyField: View {
                         Image(systemName: "doc.on.clipboard")
                     }
                     .buttonStyle(.borderless)
-                    .accessibilityLabel("Paste")
+                    .accessibilityLabel(L("Paste"))
                 }
             }
 

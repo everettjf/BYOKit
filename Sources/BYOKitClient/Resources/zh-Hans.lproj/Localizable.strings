@@ -1,0 +1,11 @@
+/* BYOKitClient — 简体中文 */
+"An API key is required." = "需要 API Key。";
+"A base URL is required." = "需要 Base URL。";
+"No model selected." = "未选择模型。";
+"The endpoint URL is invalid." = "接入点 URL 无效。";
+"Request failed (HTTP %lld)%@" = "请求失败(HTTP %lld)%@";
+"Unexpected response from the server. %@" = "服务器返回了意外的响应。%@";
+"Couldn't reach the server. %@" = "无法连接到服务器。%@";
+"Connected. The endpoint returned no models." = "连接成功。该接入点未返回任何模型。";
+"Connected. Found 1 model." = "连接成功,发现 1 个模型。";
+"Connected. Found %lld models." = "连接成功,发现 %lld 个模型。";

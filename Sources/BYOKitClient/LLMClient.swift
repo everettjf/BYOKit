@@ -101,15 +101,15 @@ public enum LLMClientError: Error, Sendable, LocalizedError, Equatable {
 
     public var errorDescription: String? {
         switch self {
-        case .missingAPIKey: return "An API key is required."
-        case .missingBaseURL: return "A base URL is required."
-        case .missingModel: return "No model selected."
-        case .invalidURL: return "The endpoint URL is invalid."
+        case .missingAPIKey: return L("An API key is required.")
+        case .missingBaseURL: return L("A base URL is required.")
+        case .missingModel: return L("No model selected.")
+        case .invalidURL: return L("The endpoint URL is invalid.")
         case let .http(status, body):
             let detail = (body?.isEmpty == false) ? ": \(body!)" : ""
-            return "Request failed (HTTP \(status))\(detail)"
-        case let .decoding(msg): return "Unexpected response from the server. \(msg)"
-        case let .transport(msg): return "Couldn't reach the server. \(msg)"
+            return L("Request failed (HTTP \(status))\(detail)")
+        case let .decoding(msg): return L("Unexpected response from the server. \(msg)")
+        case let .transport(msg): return L("Couldn't reach the server. \(msg)")
         case let .unsupported(msg): return msg
         }
     }
@@ -125,4 +125,28 @@ public protocol LLMClient: Sendable {
     func listModels(_ resolved: ResolvedConfiguration) async throws -> [ModelInfo]
     /// Send a completion request.
     func complete(_ request: CompletionRequest, with resolved: ResolvedConfiguration) async throws -> CompletionResponse
+    /// Stream a completion as incremental text chunks. Each yielded value is a
+    /// delta to be appended to the running text — concatenating them yields the
+    /// full response. Conformers may rely on the default, which simply runs
+    /// `complete` and yields the whole text once.
+    func streamComplete(_ request: CompletionRequest, with resolved: ResolvedConfiguration) -> AsyncThrowingStream<String, Error>
+}
+
+public extension LLMClient {
+    /// Default streaming: fall back to a single `complete` call and yield its
+    /// full text as one chunk. Override for true incremental delivery.
+    func streamComplete(_ request: CompletionRequest, with resolved: ResolvedConfiguration) -> AsyncThrowingStream<String, Error> {
+        AsyncThrowingStream { continuation in
+            let task = Task {
+                do {
+                    let response = try await complete(request, with: resolved)
+                    if !response.text.isEmpty { continuation.yield(response.text) }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
 }

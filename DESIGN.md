@@ -1,7 +1,10 @@
 # BYOKit — Package 设计方案
 
-> **状态（2026-05-31）：M1+M2 已实现并通过测试。** 全部 5 个 target 落地，10 个内置厂商，
-> 32 个测试全绿（含 2 个对真实 OpenAI API 的 live smoke test），已在 iOS / iPadOS 模拟器与
+> **状态（2026-06-01）：M1–M3 已实现，M4 进行中。** 全部 target 落地，10 个内置厂商
+> + 本地模型（MLX / llama.cpp / Apple Foundation Models），**流式输出**（SSE / NDJSON，
+> 覆盖 OpenAI / Anthropic / Gemini / Ollama，并经 AnyLanguageModel 适配器原生流式），
+> **国际化（en + zh-Hans）** 覆盖 UI 文案 + Core 校验提示 + Client 错误/连接消息。
+> 52 个测试全绿（含 2 个对真实 OpenAI API 的 live smoke test），已在 iOS / iPadOS 模拟器与
 > macOS 上验证运行。Example/ 含可运行的多平台 Demo。详见 [README](README.md)。
 
 ---
@@ -357,8 +360,8 @@ if let active = store.resolvedActive() {
 |---|---|
 | **M1 Core** | 数据模型 + providers.json + Keychain 存储 + `LLMClient` 协议（先实现 `validate`/`listModels`）。无 UI 也能用。 |
 | **M2 UI** | ProviderPicker / ConfigForm / KeyField / ConnectionTest / OnboardingGuide + `BYOKSettingsView`。 |
-| **M3 Adapter** | AnyLanguageModel 适配器 + 动态模型拉取 + 示例 App。 |
-| **M4 打磨** | i18n、主题、a11y、provider OTA 更新、单测 + 快照测试，发 1.0。 |
+| **M3 Adapter** | AnyLanguageModel 适配器 + 动态模型拉取 + 示例 App。✅ |
+| **M4 打磨** | i18n（en + zh-Hans）✅、流式输出 ✅、主题 ✅、a11y（进行中）、provider OTA 更新 ✅、单测 ✅。剩余：更广的 a11y 覆盖与快照测试。 |
 
 ---
 

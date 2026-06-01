@@ -1,0 +1,5 @@
+/* BYOKitCore — English (development language) */
+"The key is empty." = "The key is empty.";
+"Expected the key to start with \"%@\"." = "Expected the key to start with \"%@\".";
+"The key looks too short." = "The key looks too short.";
+"The key format doesn't look right." = "The key format doesn't look right.";

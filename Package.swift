@@ -50,11 +50,13 @@ let package = Package(
         ),
         .target(
             name: "BYOKitClient",
-            dependencies: ["BYOKitCore"]
+            dependencies: ["BYOKitCore"],
+            resources: [.process("Resources")]
         ),
         .target(
             name: "BYOKitUI",
-            dependencies: ["BYOKitCore", "BYOKitStore", "BYOKitClient"]
+            dependencies: ["BYOKitCore", "BYOKitStore", "BYOKitClient"],
+            resources: [.process("Resources")]
         ),
         .target(
             name: "BYOKit",
