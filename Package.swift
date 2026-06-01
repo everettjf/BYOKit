@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "AnyLLM",
+    name: "BYOKit",
     defaultLocalization: "en",
     platforms: [
         .iOS(.v17),
@@ -10,36 +10,36 @@ let package = Package(
     ],
     products: [
         // One-line umbrella: re-exports everything.
-        .library(name: "AnyLLM", targets: ["AnyLLM"]),
+        .library(name: "BYOKit", targets: ["BYOKit"]),
         // Pure data layer, zero dependencies & zero UI.
-        .library(name: "AnyLLMCore", targets: ["AnyLLMCore"]),
+        .library(name: "BYOKitCore", targets: ["BYOKitCore"]),
         // SwiftUI configuration components.
-        .library(name: "AnyLLMUI", targets: ["AnyLLMUI"]),
+        .library(name: "BYOKitUI", targets: ["BYOKitUI"]),
     ],
     targets: [
         .target(
-            name: "AnyLLMCore",
+            name: "BYOKitCore",
             resources: [.process("Resources")]
         ),
         .target(
-            name: "AnyLLMStore",
-            dependencies: ["AnyLLMCore"]
+            name: "BYOKitStore",
+            dependencies: ["BYOKitCore"]
         ),
         .target(
-            name: "AnyLLMClient",
-            dependencies: ["AnyLLMCore"]
+            name: "BYOKitClient",
+            dependencies: ["BYOKitCore"]
         ),
         .target(
-            name: "AnyLLMUI",
-            dependencies: ["AnyLLMCore", "AnyLLMStore", "AnyLLMClient"]
+            name: "BYOKitUI",
+            dependencies: ["BYOKitCore", "BYOKitStore", "BYOKitClient"]
         ),
         .target(
-            name: "AnyLLM",
-            dependencies: ["AnyLLMCore", "AnyLLMStore", "AnyLLMClient", "AnyLLMUI"]
+            name: "BYOKit",
+            dependencies: ["BYOKitCore", "BYOKitStore", "BYOKitClient", "BYOKitUI"]
         ),
         .testTarget(
-            name: "AnyLLMTests",
-            dependencies: ["AnyLLM"]
+            name: "BYOKitTests",
+            dependencies: ["BYOKit"]
         ),
     ],
     swiftLanguageModes: [.v5]

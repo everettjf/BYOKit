@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AnyLLM — BYOK LLM configuration for Swift</title>
+<title>BYOKit — BYOK LLM configuration for Swift</title>
 <meta name="description" content="A Swift Package that gives any iOS, iPadOS, or macOS app a production-grade Bring-Your-Own-Key (BYOK) LLM configuration experience in one line.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -100,13 +100,13 @@
 
 <nav>
   <div class="wrap">
-    <div class="brand"><span class="logo">LLM</span> AnyLLM</div>
+    <div class="brand"><span class="logo">LLM</span> BYOKit</div>
     <div class="nav-links">
       <a href="#features">Features</a>
       <a href="#start">Quick Start</a>
       <a href="#providers">Providers</a>
       <a href="#architecture">Architecture</a>
-      <a class="btn btn-ghost" href="https://github.com/everettjf/AnyLLM">GitHub ↗</a>
+      <a class="btn btn-ghost" href="https://github.com/everettjf/BYOKit">GitHub ↗</a>
     </div>
   </div>
 </nav>
@@ -120,7 +120,7 @@
       testing, Keychain storage — in <strong>one line</strong>.</p>
     <div class="cta">
       <a class="btn btn-primary" href="#start">Get Started</a>
-      <a class="btn btn-ghost" href="https://github.com/everettjf/AnyLLM">View on GitHub</a>
+      <a class="btn btn-ghost" href="https://github.com/everettjf/BYOKit">View on GitHub</a>
     </div>
     <div class="badges">
       <img alt="platforms" src="https://img.shields.io/badge/platforms-iOS%2017%20·%20iPadOS%2017%20·%20macOS%2014-blue">
@@ -138,11 +138,11 @@
 
 <section class="section muted-bg" id="why">
   <div class="wrap">
-    <div class="kicker">Why AnyLLM</div>
+    <div class="kicker">Why BYOKit</div>
     <h2>The hard part isn't calling models. It's the config UX.</h2>
     <p class="sub">Plenty of great libraries call LLM APIs. But every BYOK app re-builds the same
       provider list, key field, "where do I get a key?" guidance, Keychain plumbing, and connection
-      test by hand. AnyLLM ships all of it as polished, themeable SwiftUI — and keeps the model
+      test by hand. BYOKit ships all of it as polished, themeable SwiftUI — and keeps the model
       calls behind a swappable protocol.</p>
   </div>
 </section>
@@ -154,7 +154,7 @@
     <p class="sub">Drop in the whole settings center, or compose the pieces you want.</p>
     <div class="grid">
       <div class="card"><div class="ic">⚡️</div><h3>One-line settings center</h3>
-        <p>List, add, edit, reorder, delete, and choose the active provider — <code>AnyLLMSettingsView()</code>.</p></div>
+        <p>List, add, edit, reorder, delete, and choose the active provider — <code>BYOKSettingsView()</code>.</p></div>
       <div class="card"><div class="ic">🧭</div><h3>Per-provider onboarding</h3>
         <p>Structured "get a key" guide with steps, caveats, and deep links to console, sign-up, docs, and pricing.</p></div>
       <div class="card"><div class="ic">🔒</div><h3>Secure by default</h3>
@@ -176,15 +176,15 @@
     <p class="sub">Add the package, then render the settings view. That's it.</p>
     <h3 style="margin:24px 0 10px">1 · Add the package</h3>
 <pre><span class="c">// Package.swift</span>
-.<span class="f">package</span>(url: <span class="s">"https://github.com/everettjf/AnyLLM"</span>, from: <span class="s">"1.0.0"</span>)</pre>
+.<span class="f">package</span>(url: <span class="s">"https://github.com/everettjf/BYOKit"</span>, from: <span class="s">"1.0.0"</span>)</pre>
     <h3 style="margin:28px 0 10px">2 · Show the settings center</h3>
-<pre><span class="k">import</span> AnyLLM
+<pre><span class="k">import</span> BYOKit
 
 <span class="k">struct</span> SettingsScreen: <span class="t">View</span> {
     <span class="k">var</span> body: <span class="k">some</span> <span class="t">View</span> {
-        <span class="t">AnyLLMSettingsView</span>()
+        <span class="t">BYOKSettingsView</span>()
             .<span class="f">environmentObject</span>(store)              <span class="c">// a ConfigurationStore</span>
-            .<span class="f">anyLLMClient</span>(<span class="t">DefaultLLMClient</span>())     <span class="c">// or your own LLMClient</span>
+            .<span class="f">byokClient</span>(<span class="t">DefaultLLMClient</span>())     <span class="c">// or your own LLMClient</span>
     }
 }</pre>
     <h3 style="margin:28px 0 10px">Send a request with the active config</h3>
@@ -225,15 +225,15 @@
   <div class="wrap">
     <div class="kicker">Architecture</div>
     <h2>Layered, so you take only what you need</h2>
-    <p class="sub"><code>AnyLLMCore</code> has zero third-party dependencies. Nothing pulls in a heavy SDK unless you choose to.</p>
+    <p class="sub"><code>BYOKitCore</code> has zero third-party dependencies. Nothing pulls in a heavy SDK unless you choose to.</p>
     <div class="card" style="padding:6px 8px">
     <table>
       <tr><th>Target</th><th>Role</th><th>Depends on</th></tr>
-      <tr><td><code>AnyLLMCore</code></td><td>Models, registry, onboarding metadata, providers.json</td><td>—</td></tr>
-      <tr><td><code>AnyLLMStore</code></td><td>Keychain credentials + configuration persistence</td><td>Core</td></tr>
-      <tr><td><code>AnyLLMClient</code></td><td>LLMClient protocol + DefaultLLMClient (URLSession)</td><td>Core</td></tr>
-      <tr><td><code>AnyLLMUI</code></td><td>SwiftUI components</td><td>Core · Store · Client</td></tr>
-      <tr><td><code>AnyLLM</code></td><td>Umbrella re-export</td><td>all</td></tr>
+      <tr><td><code>BYOKitCore</code></td><td>Models, registry, onboarding metadata, providers.json</td><td>—</td></tr>
+      <tr><td><code>BYOKitStore</code></td><td>Keychain credentials + configuration persistence</td><td>Core</td></tr>
+      <tr><td><code>BYOKitClient</code></td><td>LLMClient protocol + DefaultLLMClient (URLSession)</td><td>Core</td></tr>
+      <tr><td><code>BYOKitUI</code></td><td>SwiftUI components</td><td>Core · Store · Client</td></tr>
+      <tr><td><code>BYOKit</code></td><td>Umbrella re-export</td><td>all</td></tr>
     </table>
     </div>
     <p class="sub" style="margin-top:28px">Reusable public components: <code>ProviderPickerView</code>,
@@ -252,7 +252,7 @@
 
 <footer>
   <div class="wrap">
-    <p><strong>AnyLLM</strong> — MIT licensed · Built with <a href="https://github.com/everettjf/AnyLLM">everettjf/AnyLLM</a></p>
+    <p><strong>BYOKit</strong> — MIT licensed · Built with <a href="https://github.com/everettjf/BYOKit">everettjf/BYOKit</a></p>
     <p style="margin-top:6px">Crafted for the Apple platforms BYOK ecosystem.</p>
   </div>
 </footer>

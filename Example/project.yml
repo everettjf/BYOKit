@@ -1,20 +1,20 @@
-name: AnyLLMDemo
+name: BYOKitDemo
 options:
-  bundleIdPrefix: com.anyllm.demo
+  bundleIdPrefix: com.byokit.demo
   deploymentTarget:
     iOS: "17.0"
     macOS: "14.0"
 packages:
-  AnyLLM:
+  BYOKit:
     path: ..
 targets:
-  AnyLLMDemo:
+  BYOKitDemo:
     type: application
     platform: [iOS, macOS]
     sources: [Sources]
     dependencies:
-      - package: AnyLLM
-        product: AnyLLM
+      - package: BYOKit
+        product: BYOKit
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES
@@ -22,4 +22,4 @@ targets:
         CURRENT_PROJECT_VERSION: "1"
         SWIFT_VERSION: "5.0"
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
-        INFOPLIST_KEY_CFBundleDisplayName: AnyLLM
+        INFOPLIST_KEY_CFBundleDisplayName: BYOKit

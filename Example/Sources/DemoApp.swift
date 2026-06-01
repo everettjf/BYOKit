@@ -1,13 +1,13 @@
 import SwiftUI
-import AnyLLM
+import BYOKit
 
-/// Minimal host app demonstrating AnyLLM. The entire BYOK configuration
-/// experience is `AnyLLMSettingsView()` — everything else here is host chrome.
+/// Minimal host app demonstrating BYOKit. The entire BYOK configuration
+/// experience is `BYOKSettingsView()` — everything else here is host chrome.
 ///
 /// `ANYLLM_DEMO` env var selects a screen for demos/screenshots:
 /// `list` (default), `list-seeded`, `picker`, `form`, `onboarding`.
 @main
-struct AnyLLMDemoApp: App {
+struct BYOKitDemoApp: App {
     @StateObject private var store: ConfigurationStore
 
     init() {
@@ -27,8 +27,8 @@ struct AnyLLMDemoApp: App {
         WindowGroup {
             DemoRootView()
                 .environmentObject(store)
-                .anyLLMClient(DefaultLLMClient())
-                .anyLLMTheme(AnyLLMTheme(cornerRadius: 14))
+                .byokClient(DefaultLLMClient())
+                .byokTheme(BYOKTheme(cornerRadius: 14))
         }
         #if os(macOS)
         .defaultSize(width: 760, height: 680)
@@ -54,7 +54,7 @@ struct DemoRootView: View {
                     OnboardingGuideView(provider: openai)
                 }
             default:
-                AnyLLMSettingsView()
+                BYOKSettingsView()
             }
         }
         .task {
