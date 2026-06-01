@@ -11,3 +11,6 @@ Example/BYOKitDemo.xcodeproj/
 # SwiftPM
 Package.resolved
 .swiftpm/
+
+# Local harness state
+.claude/
