@@ -61,6 +61,7 @@ public struct AnyLanguageModelClient: LLMClient {
     }
 
     private func appleAvailability() -> (ok: Bool, message: String) {
+        #if canImport(FoundationModels)
         if #available(iOS 26.0, macOS 26.0, *) {
             switch SystemLanguageModel.default.availability {
             case .available:
@@ -71,9 +72,13 @@ public struct AnyLanguageModelClient: LLMClient {
         } else {
             return (false, "Apple Foundation Models require a newer OS version.")
         }
+        #else
+        return (false, "This build was compiled without Foundation Models support.")
+        #endif
     }
 
     private func completeWithAppleFoundationModels(_ request: CompletionRequest) async throws -> CompletionResponse {
+        #if canImport(FoundationModels)
         if #available(iOS 26.0, macOS 26.0, *) {
             let model = SystemLanguageModel.default
             guard case .available = model.availability else {
@@ -90,5 +95,8 @@ public struct AnyLanguageModelClient: LLMClient {
         } else {
             throw LLMClientError.unsupported("Apple Foundation Models require a newer OS version.")
         }
+        #else
+        throw LLMClientError.unsupported("This build was compiled without Foundation Models support.")
+        #endif
     }
 }
