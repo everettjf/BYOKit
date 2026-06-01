@@ -15,6 +15,14 @@ let package = Package(
         .library(name: "BYOKitCore", targets: ["BYOKitCore"]),
         // SwiftUI configuration components.
         .library(name: "BYOKitUI", targets: ["BYOKitUI"]),
+        // Optional adapter adding on-device Apple Foundation Models via AnyLanguageModel.
+        .library(name: "BYOKitClientAnyLanguageModel", targets: ["BYOKitClientAnyLanguageModel"]),
+    ],
+    dependencies: [
+        // Only pulled in if you depend on BYOKitClientAnyLanguageModel.
+        // Default traits are empty (light); enable MLX/Llama/CoreML traits in your
+        // own app's dependency edge to extend local-model support.
+        .package(url: "https://github.com/huggingface/AnyLanguageModel.git", from: "0.8.0"),
     ],
     targets: [
         .target(
@@ -37,9 +45,17 @@ let package = Package(
             name: "BYOKit",
             dependencies: ["BYOKitCore", "BYOKitStore", "BYOKitClient", "BYOKitUI"]
         ),
+        .target(
+            name: "BYOKitClientAnyLanguageModel",
+            dependencies: [
+                "BYOKitCore",
+                "BYOKitClient",
+                .product(name: "AnyLanguageModel", package: "AnyLanguageModel"),
+            ]
+        ),
         .testTarget(
             name: "BYOKitTests",
-            dependencies: ["BYOKit"]
+            dependencies: ["BYOKit", "BYOKitClientAnyLanguageModel"]
         ),
     ],
     swiftLanguageModes: [.v5]

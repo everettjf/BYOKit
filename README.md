@@ -117,6 +117,27 @@ BYOKSettingsView()
 `ConnectionTestButton`, `KeyField`, and `ProviderBadge` are all public and usable
 on their own.
 
+### On-device models (Apple Intelligence)
+
+The optional `BYOKitClientAnyLanguageModel` product adds **on-device Apple
+Foundation Models** via [AnyLanguageModel](https://github.com/huggingface/AnyLanguageModel),
+delegating every cloud/HTTP provider to a wrapped fallback (so custom BYOK
+endpoints keep working through `DefaultLLMClient`):
+
+```swift
+import BYOKitClientAnyLanguageModel
+
+let builtins = await ProviderRegistry.shared.all()
+
+BYOKSettingsView()
+    .byokClient(AnyLanguageModelClient())                  // adds on-device support
+    .byokProviders(builtins + [.appleFoundationModels])    // expose the Apple provider
+```
+
+Only depend on this product if you want local models — the base `BYOKit` library
+stays dependency-free. To add MLX or llama.cpp models, enable the matching trait
+on the `AnyLanguageModel` dependency in your app.
+
 ## Architecture
 
 | Target | Role | Dependencies |
@@ -126,9 +147,10 @@ on their own.
 | `BYOKitClient` | `LLMClient` protocol + `DefaultLLMClient` (URLSession) | Core |
 | `BYOKitUI` | SwiftUI components | Core, Store, Client |
 | `BYOKit` | Umbrella re-export | all |
+| `BYOKitClientAnyLanguageModel` | Optional — on-device Apple Foundation Models | Core, Client, [AnyLanguageModel](https://github.com/huggingface/AnyLanguageModel) |
 
-`BYOKitCore` has **zero third-party dependencies**. Nothing pulls in a heavy SDK
-unless you choose to write an adapter.
+`BYOKitCore` has **zero third-party dependencies**, and the base `BYOKit` library
+pulls in nothing third-party. Only the optional adapter above adds a dependency.
 
 ## Example app
 
@@ -146,15 +168,17 @@ open BYOKitDemo.xcodeproj
 swift test
 ```
 
-32 tests cover the registry, key validation, Keychain round-trips, the store, and
-all four API formats (via a stubbed `URLProtocol`). Set `ROCKY_OPENAI_APIKEY` to
-also run two live OpenAI smoke tests (skipped otherwise). The package is build-
-verified on macOS and the iOS/iPadOS simulator SDKs.
+35 tests cover the registry, key validation, Keychain round-trips, the store,
+all four API formats (via a stubbed `URLProtocol`), and the AnyLanguageModel
+adapter's delegation. Set `ROCKY_OPENAI_APIKEY` to also run two live OpenAI smoke
+tests (skipped otherwise). The package is build-verified on macOS and the
+iOS/iPadOS simulator SDKs.
 
 ## Roadmap
 
 - [x] **M1/M2** — Core models, Keychain store, URLSession client, full SwiftUI configuration UI.
-- [ ] **M3** — Optional `AnyLanguageModel` adapter (local MLX / Foundation Models) behind `LLMClient`.
+- [x] **M3** — Optional `AnyLanguageModel` adapter (on-device Apple Foundation Models) behind `LLMClient`.
+- [ ] MLX / llama.cpp local models via AnyLanguageModel traits.
 - [ ] Streaming completions; usage/quota hints.
 - [ ] DocC API reference on the docs site.
 - [ ] Localization (zh-Hans first).
