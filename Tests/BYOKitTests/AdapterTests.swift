@@ -75,4 +75,36 @@ final class AdapterTests: XCTestCase {
         XCTAssertEqual(stub.listed, 0)
         XCTAssertEqual(models.first?.id, "default")
     }
+
+    func testMLXAndLlamaProviderDefinitions() {
+        let mlx = Provider.mlx
+        XCTAssertEqual(mlx.id, .mlx)
+        XCTAssertEqual(mlx.kind, .local)
+        XCTAssertFalse(mlx.credential.requiresAPIKey)
+        XCTAssertFalse(mlx.models.presets.isEmpty)
+
+        let llama = Provider.llama
+        XCTAssertEqual(llama.id, .llama)
+        XCTAssertTrue(llama.credential.extraFields.contains { $0.id == byokLlamaModelPathField })
+    }
+
+    func testLocalProvidersAreServicedNativelyNotDelegated() async throws {
+        let stub = StubClient()
+        let client = AnyLanguageModelClient(fallback: stub)
+
+        let mlxResolved = ResolvedConfiguration(
+            provider: .mlx,
+            configuration: LLMConfiguration(providerID: .mlx, displayName: "m",
+                                            selectedModelID: "mlx-community/Qwen3-0.6B-4bit")
+        )
+        let result = try await client.validate(mlxResolved)
+        XCTAssertEqual(stub.validated, 0, "MLX must not delegate to the fallback")
+        XCTAssertNotNil(result.message)
+        #if MLX
+        XCTAssertTrue(result.ok)
+        #else
+        XCTAssertFalse(result.ok)
+        XCTAssertTrue(result.message?.contains("MLX") ?? false)
+        #endif
+    }
 }

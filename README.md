@@ -135,8 +135,31 @@ BYOKSettingsView()
 ```
 
 Only depend on this product if you want local models — the base `BYOKit` library
-stays dependency-free. To add MLX or llama.cpp models, enable the matching trait
-on the `AnyLanguageModel` dependency in your app.
+stays dependency-free.
+
+#### MLX & llama.cpp (opt-in traits)
+
+The adapter also services on-device **MLX** (Apple Silicon) and **llama.cpp /
+GGUF** models — gated behind BYOKit traits so the heavy backends are only pulled
+in when you ask for them:
+
+```swift
+.package(url: "https://github.com/everettjf/BYOKit", from: "1.2.0",
+         traits: ["MLX", "Llama"])     // enable the backends you want
+```
+
+```swift
+BYOKSettingsView()
+    .byokClient(AnyLanguageModelClient())
+    .byokProviders(builtins + [.appleFoundationModels, .mlx, .llama])
+```
+
+- `.mlx` — the selected model id is a Hugging Face MLX repo (e.g.
+  `mlx-community/Qwen3-0.6B-4bit`), downloaded on first use.
+- `.llama` — point the `modelPath` field at a local `.gguf` file.
+
+With neither trait enabled (the default), these providers report that the backend
+isn't compiled in, and nothing heavy is added to your graph.
 
 ## Architecture
 
@@ -147,7 +170,7 @@ on the `AnyLanguageModel` dependency in your app.
 | `BYOKitClient` | `LLMClient` protocol + `DefaultLLMClient` (URLSession) | Core |
 | `BYOKitUI` | SwiftUI components | Core, Store, Client |
 | `BYOKit` | Umbrella re-export | all |
-| `BYOKitClientAnyLanguageModel` | Optional — on-device Apple Foundation Models | Core, Client, [AnyLanguageModel](https://github.com/huggingface/AnyLanguageModel) |
+| `BYOKitClientAnyLanguageModel` | Optional — on-device Apple Foundation Models (+ MLX / llama.cpp via traits) | Core, Client, [AnyLanguageModel](https://github.com/huggingface/AnyLanguageModel) |
 
 `BYOKitCore` has **zero third-party dependencies**, and the base `BYOKit` library
 pulls in nothing third-party. Only the optional adapter above adds a dependency.
@@ -178,7 +201,7 @@ iOS/iPadOS simulator SDKs.
 
 - [x] **M1/M2** — Core models, Keychain store, URLSession client, full SwiftUI configuration UI.
 - [x] **M3** — Optional `AnyLanguageModel` adapter (on-device Apple Foundation Models) behind `LLMClient`.
-- [ ] MLX / llama.cpp local models via AnyLanguageModel traits.
+- [x] MLX / llama.cpp local models via opt-in BYOKit traits.
 - [ ] Streaming completions; usage/quota hints.
 - [ ] DocC API reference on the docs site.
 - [ ] Localization (zh-Hans first).

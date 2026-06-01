@@ -26,32 +26,67 @@ public struct AnyLanguageModelClient: LLMClient {
         self.fallback = fallback
     }
 
-    private func isApple(_ provider: Provider) -> Bool {
-        provider.id == .appleFoundation
+    /// Providers this adapter services natively (everything else delegates).
+    private func isNative(_ provider: Provider) -> Bool {
+        switch provider.id {
+        case .appleFoundation, .mlx, .llama: return true
+        default: return false
+        }
     }
 
     // MARK: - LLMClient
 
     public func validate(_ resolved: ResolvedConfiguration) async throws -> ValidationResult {
-        guard isApple(resolved.provider) else { return try await fallback.validate(resolved) }
+        guard isNative(resolved.provider) else { return try await fallback.validate(resolved) }
         let start = Date()
-        let (ok, message) = appleAvailability()
+        let (ok, message) = nativeReadiness(resolved)
         return ValidationResult(
             ok: ok,
             latency: Date().timeIntervalSince(start),
-            detectedModels: ok ? appleModels() : nil,
+            detectedModels: ok ? nativeModels(resolved) : nil,
             message: message
         )
     }
 
     public func listModels(_ resolved: ResolvedConfiguration) async throws -> [ModelInfo] {
-        guard isApple(resolved.provider) else { return try await fallback.listModels(resolved) }
-        return appleModels()
+        guard isNative(resolved.provider) else { return try await fallback.listModels(resolved) }
+        return nativeModels(resolved)
     }
 
     public func complete(_ request: CompletionRequest, with resolved: ResolvedConfiguration) async throws -> CompletionResponse {
-        guard isApple(resolved.provider) else { return try await fallback.complete(request, with: resolved) }
-        return try await completeWithAppleFoundationModels(request)
+        switch resolved.provider.id {
+        case .appleFoundation: return try await completeWithAppleFoundationModels(request)
+        case .mlx:             return try await completeWithMLX(request, resolved)
+        case .llama:           return try await completeWithLlama(request, resolved)
+        default:               return try await fallback.complete(request, with: resolved)
+        }
+    }
+
+    // MARK: - Native readiness / models
+
+    private func nativeReadiness(_ resolved: ResolvedConfiguration) -> (ok: Bool, message: String) {
+        switch resolved.provider.id {
+        case .appleFoundation: return appleAvailability()
+        case .mlx:             return mlxReadiness(resolved)
+        case .llama:           return llamaReadiness(resolved)
+        default:               return (false, "Unsupported provider.")
+        }
+    }
+
+    private func nativeModels(_ resolved: ResolvedConfiguration) -> [ModelInfo] {
+        switch resolved.provider.id {
+        case .appleFoundation:
+            return appleModels()
+        case .mlx:
+            if let id = resolved.modelID, !id.isEmpty { return [ModelInfo(id: id)] }
+            return resolved.provider.models.presets
+        case .llama:
+            let path = resolved.configuration.extraValues[byokLlamaModelPathField] ?? ""
+            let name = (path as NSString).lastPathComponent
+            return path.isEmpty ? [] : [ModelInfo(id: path, displayName: name)]
+        default:
+            return []
+        }
     }
 
     // MARK: - Apple Foundation Models
@@ -98,5 +133,68 @@ public struct AnyLanguageModelClient: LLMClient {
         #else
         throw LLMClientError.unsupported("This build was compiled without Foundation Models support.")
         #endif
+    }
+
+    // MARK: - MLX (Apple Silicon, gated by the `MLX` trait)
+
+    private func mlxReadiness(_ resolved: ResolvedConfiguration) -> (ok: Bool, message: String) {
+        #if MLX
+        guard let id = resolved.modelID, !id.isEmpty else {
+            return (false, "Enter a Hugging Face MLX model id (e.g. mlx-community/Qwen3-0.6B-4bit).")
+        }
+        return (true, "MLX backend ready. \"\(id)\" downloads/loads on first use.")
+        #else
+        return (false, "Rebuild with BYOKit's \"MLX\" trait enabled to use on-device MLX models.")
+        #endif
+    }
+
+    private func completeWithMLX(_ request: CompletionRequest, _ resolved: ResolvedConfiguration) async throws -> CompletionResponse {
+        #if MLX
+        guard let id = resolved.modelID, !id.isEmpty else { throw LLMClientError.missingModel }
+        let model = MLXLanguageModel(modelId: id)
+        return try await run(request, on: model, modelID: id)
+        #else
+        throw LLMClientError.unsupported("MLX support is not enabled. Add the \"MLX\" trait to your BYOKit dependency.")
+        #endif
+    }
+
+    // MARK: - llama.cpp / GGUF (gated by the `Llama` trait)
+
+    private func llamaReadiness(_ resolved: ResolvedConfiguration) -> (ok: Bool, message: String) {
+        let path = resolved.configuration.extraValues[byokLlamaModelPathField] ?? ""
+        #if Llama
+        guard !path.isEmpty else { return (false, "Enter the path to a .gguf model file.") }
+        guard FileManager.default.fileExists(atPath: path) else {
+            return (false, "No file found at \"\(path)\".")
+        }
+        return (true, "llama.cpp backend ready. Model loads on first use.")
+        #else
+        return (false, "Rebuild with BYOKit's \"Llama\" trait enabled to use GGUF models.")
+        #endif
+    }
+
+    private func completeWithLlama(_ request: CompletionRequest, _ resolved: ResolvedConfiguration) async throws -> CompletionResponse {
+        let path = resolved.configuration.extraValues[byokLlamaModelPathField] ?? ""
+        #if Llama
+        guard !path.isEmpty else { throw LLMClientError.missingModel }
+        let model = LlamaLanguageModel(modelPath: path)
+        let name = (path as NSString).lastPathComponent
+        return try await run(request, on: model, modelID: name)
+        #else
+        throw LLMClientError.unsupported("llama.cpp support is not enabled. Add the \"Llama\" trait to your BYOKit dependency.")
+        #endif
+    }
+
+    // MARK: - Shared session runner
+
+    /// Runs a prompt through any AnyLanguageModel model and returns the text.
+    private func run<M: LanguageModel>(_ request: CompletionRequest, on model: M, modelID: String) async throws -> CompletionResponse {
+        let system = request.messages.filter { $0.role == .system }.map(\.content).joined(separator: "\n\n")
+        let userText = request.messages.filter { $0.role != .system }.map(\.content).joined(separator: "\n\n")
+        let session = system.isEmpty
+            ? LanguageModelSession(model: model)
+            : LanguageModelSession(model: model, instructions: system)
+        let response = try await session.respond(to: userText)
+        return CompletionResponse(text: response.content, modelID: modelID)
     }
 }

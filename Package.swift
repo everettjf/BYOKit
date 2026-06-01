@@ -18,11 +18,26 @@ let package = Package(
         // Optional adapter adding on-device Apple Foundation Models via AnyLanguageModel.
         .library(name: "BYOKitClientAnyLanguageModel", targets: ["BYOKitClientAnyLanguageModel"]),
     ],
+    traits: [
+        // Opt-in heavy local backends. Enabling one propagates the matching
+        // trait to AnyLanguageModel. Default enables none, so the base library
+        // and CI stay light.
+        .trait(name: "MLX", description: "On-device MLX models (Apple Silicon) via AnyLanguageModel."),
+        .trait(name: "Llama", description: "On-device llama.cpp / GGUF models via AnyLanguageModel."),
+        .default(enabledTraits: []),
+    ],
     dependencies: [
         // Only pulled in if you depend on BYOKitClientAnyLanguageModel.
-        // Default traits are empty (light); enable MLX/Llama/CoreML traits in your
-        // own app's dependency edge to extend local-model support.
-        .package(url: "https://github.com/huggingface/AnyLanguageModel.git", from: "0.8.0"),
+        // BYOKit's MLX/Llama traits propagate to AnyLanguageModel's; with neither
+        // enabled the dependency stays light (no MLX / llama.cpp).
+        .package(
+            url: "https://github.com/huggingface/AnyLanguageModel.git",
+            from: "0.8.0",
+            traits: [
+                .trait(name: "MLX", condition: .when(traits: ["MLX"])),
+                .trait(name: "Llama", condition: .when(traits: ["Llama"])),
+            ]
+        ),
     ],
     targets: [
         .target(
