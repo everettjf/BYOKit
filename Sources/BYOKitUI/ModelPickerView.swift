@@ -15,7 +15,7 @@ struct ModelPickerView: View {
 
     var body: some View {
         if !models.isEmpty && !useCustomModel {
-            Picker("Model", selection: Binding(
+            Picker(L("Model"), selection: Binding(
                 get: { selectedModelID ?? models.first?.id },
                 set: { selectedModelID = $0 }
             )) {
@@ -29,7 +29,7 @@ struct ModelPickerView: View {
         }
 
         if useCustomModel {
-            TextField("Model ID", text: $customModelID)
+            TextField(L("Model ID"), text: $customModelID)
                 .font(.body.monospaced())
                 #if os(iOS)
                 .textInputAutocapitalization(.never)
@@ -37,7 +37,7 @@ struct ModelPickerView: View {
                 #endif
         }
 
-        Toggle("Enter model ID manually", isOn: $useCustomModel.animation())
+        Toggle(L("Enter model ID manually"), isOn: $useCustomModel.animation())
             .font(.callout)
 
         if supportsRefresh {
@@ -47,10 +47,10 @@ struct ModelPickerView: View {
                 HStack {
                     if isRefreshing {
                         ProgressView().controlSize(.small)
-                        Text("Fetching models…")
+                        Text(L("Fetching models…"))
                     } else {
                         Image(systemName: "arrow.clockwise")
-                        Text("Refresh model list")
+                        Text(L("Refresh model list"))
                     }
                 }
             }

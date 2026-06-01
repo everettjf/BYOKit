@@ -41,13 +41,13 @@ public struct ProviderConfigForm: View {
             if model.isEditing { generalSection }
         }
         .byokFormStyle()
-        .navigationTitle(model.isEditing ? model.displayName : "Add \(model.provider.displayName)")
+        .navigationTitle(model.isEditing ? model.displayName : L("Add \(model.provider.displayName)"))
         #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
-                Button("Save") {
+                Button(L("Save")) {
                     onSave(model.makeConfiguration(), model.apiKey.trimmingCharacters(in: .whitespacesAndNewlines))
                     dismiss()
                 }
@@ -72,7 +72,7 @@ public struct ProviderConfigForm: View {
             }
             .padding(.vertical, 2)
 
-            TextField("Display name", text: $model.displayName)
+            TextField(L("Display name"), text: $model.displayName)
         }
     }
 
@@ -96,7 +96,7 @@ public struct ProviderConfigForm: View {
                 Button {
                     showingOnboarding = true
                 } label: {
-                    Label("Don't have a key? Get one", systemImage: "questionmark.circle")
+                    Label(L("Don't have a key? Get one"), systemImage: "questionmark.circle")
                         .font(.callout)
                 }
                 .buttonStyle(.borderless)
@@ -121,7 +121,7 @@ public struct ProviderConfigForm: View {
     private var endpointSection: some View {
         Section {
             if model.provider.allowsCustomBaseURL {
-                TextField("Base URL", text: $model.baseURLString)
+                TextField(L("Base URL"), text: $model.baseURLString)
                     .font(.body.monospaced())
                     #if os(iOS)
                     .textInputAutocapitalization(.never)
@@ -129,20 +129,20 @@ public struct ProviderConfigForm: View {
                     .keyboardType(.URL)
                     #endif
             } else if let url = model.provider.defaultBaseURL {
-                LabeledContent("Endpoint", value: url.absoluteString)
+                LabeledContent(L("Endpoint"), value: url.absoluteString)
                     .font(.callout)
             }
         } header: {
-            Text("Endpoint")
+            Text(L("Endpoint"))
         } footer: {
             if model.requiresBaseURLEntry {
-                Text("Enter the base URL of an OpenAI-compatible endpoint.")
+                Text(L("Enter the base URL of an OpenAI-compatible endpoint."))
             }
         }
     }
 
     private var modelSection: some View {
-        Section("Model") {
+        Section(L("Model")) {
             ModelPickerView(
                 models: model.availableModels,
                 selectedModelID: $model.selectedModelID,
@@ -168,15 +168,15 @@ public struct ProviderConfigForm: View {
 
     private var generalSection: some View {
         Section {
-            Toggle("Enabled", isOn: $model.isEnabled)
+            Toggle(L("Enabled"), isOn: $model.isEnabled)
         }
     }
 
     private var kindLabel: String {
         switch model.provider.kind {
-        case .cloud: return "Cloud provider"
-        case .local: return "Local — runs on your machine"
-        case .compatible: return "OpenAI-compatible endpoint"
+        case .cloud: return L("Cloud provider")
+        case .local: return L("Local — runs on your machine")
+        case .compatible: return L("OpenAI-compatible endpoint")
         }
     }
 

@@ -47,13 +47,13 @@ public struct OnboardingGuideView: View {
                 .frame(maxWidth: 560)
                 .frame(maxWidth: .infinity)
             }
-            .navigationTitle("Get a Key")
+            .navigationTitle(L("Get a Key"))
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") { dismiss() }
+                    Button(L("Done")) { dismiss() }
                 }
             }
         }
@@ -64,7 +64,7 @@ public struct OnboardingGuideView: View {
             ProviderBadge(provider: provider, size: 52)
             VStack(alignment: .leading, spacing: 2) {
                 Text(provider.displayName).font(.title2.bold())
-                Text("Follow these steps to create your \(provider.credential.keyDisplayName).")
+                Text(L("Follow these steps to create your \(provider.credential.keyDisplayName)."))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -82,7 +82,7 @@ public struct OnboardingGuideView: View {
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(Color(hex: provider.appearance.tintHex))
                 } else {
-                    Text("\(step.id)")
+                    Text(verbatim: "\(step.id)")
                         .font(.footnote.bold())
                         .foregroundStyle(Color(hex: provider.appearance.tintHex))
                 }
@@ -93,7 +93,7 @@ public struct OnboardingGuideView: View {
                     Button {
                         openURL(url)
                     } label: {
-                        Label("Open", systemImage: "arrow.up.right.square")
+                        Label(L("Open"), systemImage: "arrow.up.right.square")
                             .font(.caption.weight(.semibold))
                     }
                     .buttonStyle(.borderless)
@@ -110,7 +110,7 @@ public struct OnboardingGuideView: View {
                 Button {
                     openURL(console)
                 } label: {
-                    Label("Open \(provider.displayName) Console", systemImage: "safari")
+                    Label(L("Open \(provider.displayName) Console"), systemImage: "safari")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
@@ -118,17 +118,17 @@ public struct OnboardingGuideView: View {
             }
             HStack(spacing: 10) {
                 if let signUp = onboarding.signUpURL {
-                    Button("Sign Up") { openURL(signUp) }
+                    Button(L("Sign Up")) { openURL(signUp) }
                         .buttonStyle(.bordered)
                         .frame(maxWidth: .infinity)
                 }
                 if let docs = onboarding.docsURL {
-                    Button("Docs") { openURL(docs) }
+                    Button(L("Docs")) { openURL(docs) }
                         .buttonStyle(.bordered)
                         .frame(maxWidth: .infinity)
                 }
                 if let pricing = onboarding.pricingURL {
-                    Button("Pricing") { openURL(pricing) }
+                    Button(L("Pricing")) { openURL(pricing) }
                         .buttonStyle(.bordered)
                         .frame(maxWidth: .infinity)
                 }

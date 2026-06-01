@@ -1,0 +1,11 @@
+/* BYOKitClient — English (development language) */
+"An API key is required." = "An API key is required.";
+"A base URL is required." = "A base URL is required.";
+"No model selected." = "No model selected.";
+"The endpoint URL is invalid." = "The endpoint URL is invalid.";
+"Request failed (HTTP %lld)%@" = "Request failed (HTTP %lld)%@";
+"Unexpected response from the server. %@" = "Unexpected response from the server. %@";
+"Couldn't reach the server. %@" = "Couldn't reach the server. %@";
+"Connected. The endpoint returned no models." = "Connected. The endpoint returned no models.";
+"Connected. Found 1 model." = "Connected. Found 1 model.";
+"Connected. Found %lld models." = "Connected. Found %lld models.";

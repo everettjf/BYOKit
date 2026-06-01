@@ -46,8 +46,9 @@ app rebuilds it by hand. BYOKit ships it.
 - **Per-provider onboarding** — structured "get a key" guide with steps, notes, and deep links (console / sign-up / docs / pricing).
 - **Secure by default** — keys go to the Keychain; the UI masks them; "Test Connection" uses a minimal request.
 - **Data-driven catalog** — add a provider by editing `providers.json`; no UI code. Ships built-in, optionally overridden by a remote OTA JSON.
-- **Swappable engine** — `DefaultLLMClient` (URLSession, zero deps) speaks OpenAI, Anthropic, Gemini, and Ollama. Conform to `LLMClient` to use anything else.
+- **Swappable engine** — `DefaultLLMClient` (URLSession, zero deps) speaks OpenAI, Anthropic, Gemini, and Ollama, with **streaming** built in. Conform to `LLMClient` to use anything else.
 - **Adaptive & themeable** — looks right on iPhone, iPad, and Mac; matches your app's style.
+- **Localized** — UI, validation hints, and error messages in English + Simplified Chinese, following the host app's language.
 
 ## Built-in providers
 
@@ -100,6 +101,24 @@ if let config = store.activeConfiguration,
     print(response.text)
 }
 ```
+
+### Streaming
+
+Every `LLMClient` can stream incremental text. `DefaultLLMClient` parses the
+provider's wire stream (OpenAI/Anthropic/Gemini SSE, Ollama NDJSON); other
+clients fall back to a single `complete` call automatically.
+
+```swift
+for try await delta in client.streamComplete(.text("Write a haiku"), with: resolved) {
+    print(delta, terminator: "")   // each chunk is a delta — concatenate for the full text
+}
+```
+
+### Localization
+
+UI chrome, key-validation hints, and connection/error messages ship in **English
+and Simplified Chinese (zh-Hans)**, resolved from the package's own bundle. The
+host app's language selection drives which is shown — no setup required.
 
 ### Customization
 

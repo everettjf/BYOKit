@@ -42,8 +42,8 @@ public struct ProviderPickerView: View {
                 }
             }
         }
-        .searchable(text: $search, prompt: "Search providers")
-        .navigationTitle("Choose a Provider")
+        .searchable(text: $search, prompt: L("Search providers"))
+        .navigationTitle(L("Choose a Provider"))
         #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
@@ -51,9 +51,9 @@ public struct ProviderPickerView: View {
 
     private func sectionTitle(_ kind: ProviderKind) -> String {
         switch kind {
-        case .cloud: return "Cloud"
-        case .compatible: return "Compatible / Aggregators"
-        case .local: return "Local"
+        case .cloud: return L("Cloud")
+        case .compatible: return L("Compatible / Aggregators")
+        case .local: return L("Local")
         }
     }
 }
@@ -77,8 +77,8 @@ private struct ProviderRow: View {
     }
 
     private var subtitle: String {
-        if !provider.credential.requiresAPIKey { return "No API key required" }
+        if !provider.credential.requiresAPIKey { return L("No API key required") }
         if let host = provider.defaultBaseURL?.host { return host }
-        return "Custom endpoint"
+        return L("Custom endpoint")
     }
 }

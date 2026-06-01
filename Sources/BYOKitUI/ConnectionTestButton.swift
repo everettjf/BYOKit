@@ -4,7 +4,8 @@ import BYOKitClient
 /// A self-contained "Test Connection" control: tap → spinner → inline ✅/❌ with
 /// latency and message. Drive it with any async probe returning `ValidationResult`.
 public struct ConnectionTestButton: View {
-    public var title: String
+    /// Custom button title. When `nil`, a localized "Test Connection" is used.
+    public var title: String?
     public var tint: Color
     public var action: () async throws -> ValidationResult
     /// Called with the result so the host (e.g. the form) can react, such as
@@ -19,7 +20,7 @@ public struct ConnectionTestButton: View {
     }
 
     public init(
-        title: String = "Test Connection",
+        title: String? = nil,
         tint: Color = .accentColor,
         action: @escaping () async throws -> ValidationResult,
         onResult: @escaping (ValidationResult) -> Void = { _ in }
@@ -41,7 +42,7 @@ public struct ConnectionTestButton: View {
                     } else {
                         Image(systemName: "bolt.horizontal.circle")
                     }
-                    Text(title)
+                    Text(title ?? L("Test Connection"))
                 }
                 .frame(maxWidth: .infinity)
             }
@@ -61,11 +62,13 @@ public struct ConnectionTestButton: View {
     @ViewBuilder
     private var resultView: some View {
         if case let .done(result) = phase {
+            let message = result.message ?? (result.ok ? L("Connected.") : L("Failed."))
             HStack(alignment: .firstTextBaseline, spacing: 6) {
                 Image(systemName: result.ok ? "checkmark.circle.fill" : "xmark.octagon.fill")
                     .foregroundStyle(result.ok ? Color.green : Color.red)
+                    .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(result.message ?? (result.ok ? "Connected." : "Failed."))
+                    Text(message)
                         .font(.callout)
                         .foregroundStyle(result.ok ? Color.primary : Color.red)
                     if let latency = result.latency {
@@ -77,6 +80,9 @@ public struct ConnectionTestButton: View {
                 Spacer(minLength: 0)
             }
             .transition(.opacity)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel(result.ok ? L("Connection succeeded") : L("Connection failed"))
+            .accessibilityValue(message)
         }
     }
 

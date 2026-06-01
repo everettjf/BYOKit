@@ -27,13 +27,13 @@ public struct BYOKSettingsView: View {
     public var body: some View {
         NavigationStack {
             content
-                .navigationTitle("AI Providers")
+                .navigationTitle(L("AI Providers"))
                 .toolbar {
                     ToolbarItem(placement: .primaryAction) {
                         Button {
                             addFlowPresented = true
                         } label: {
-                            Label("Add", systemImage: "plus")
+                            Label(L("Add"), systemImage: "plus")
                         }
                         .disabled(providers.isEmpty)
                     }
@@ -75,27 +75,27 @@ public struct BYOKSettingsView: View {
                         Button {
                             store.activeConfigurationID = config.id
                         } label: {
-                            Label("Set as Active", systemImage: "checkmark.circle")
+                            Label(L("Set as Active"), systemImage: "checkmark.circle")
                         }
                         .disabled(store.activeConfigurationID == config.id || !config.isEnabled)
 
                         Button(role: .destructive) {
                             store.remove(config.id)
                         } label: {
-                            Label("Delete", systemImage: "trash")
+                            Label(L("Delete"), systemImage: "trash")
                         }
                     }
                     .swipeActions(edge: .trailing) {
                         Button(role: .destructive) {
                             store.remove(config.id)
                         } label: {
-                            Label("Delete", systemImage: "trash")
+                            Label(L("Delete"), systemImage: "trash")
                         }
                     }
                 }
                 .onMove { store.move(fromOffsets: $0, toOffset: $1) }
             } footer: {
-                Text("Tap to edit. The active provider is used by the app.")
+                Text(L("Tap to edit. The active provider is used by the app."))
             }
         }
         #if os(iOS)
@@ -105,14 +105,14 @@ public struct BYOKSettingsView: View {
 
     private var emptyState: some View {
         ContentUnavailableView {
-            Label("No Providers Yet", systemImage: "key.horizontal")
+            Label(L("No Providers Yet"), systemImage: "key.horizontal")
         } description: {
-            Text("Add an AI provider and your own API key to get started.")
+            Text(L("Add an AI provider and your own API key to get started."))
         } actions: {
             Button {
                 addFlowPresented = true
             } label: {
-                Label("Add Provider", systemImage: "plus")
+                Label(L("Add Provider"), systemImage: "plus")
             }
             .buttonStyle(.borderedProminent)
             .disabled(providers.isEmpty)
@@ -131,8 +131,8 @@ public struct BYOKSettingsView: View {
                 try? store.setAPIKey(key, for: updated.id)
             }
         } else {
-            ContentUnavailableView("Unavailable", systemImage: "exclamationmark.triangle",
-                                   description: Text("This provider is no longer available."))
+            ContentUnavailableView(L("Unavailable"), systemImage: "exclamationmark.triangle",
+                                   description: Text(L("This provider is no longer available.")))
         }
     }
 
@@ -167,7 +167,7 @@ private struct ConfigurationRow: View {
                 HStack(spacing: 6) {
                     Text(config.displayName).font(.body)
                     if isActive {
-                        Text("Active")
+                        Text(L("Active"))
                             .font(.caption2.bold())
                             .padding(.horizontal, 6).padding(.vertical, 2)
                             .background(.tint.opacity(0.15), in: Capsule())
@@ -185,7 +185,7 @@ private struct ConfigurationRow: View {
     }
 
     private var subtitle: String {
-        let model = config.selectedModelID ?? "Default model"
+        let model = config.selectedModelID ?? L("Default model")
         if let name = provider?.displayName, name != config.displayName {
             return "\(name) · \(model)"
         }
@@ -214,7 +214,7 @@ private struct AddConfigurationFlow: View {
             }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button(L("Cancel")) { dismiss() }
                 }
             }
         }

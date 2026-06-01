@@ -1,0 +1,5 @@
+/* BYOKitCore — 简体中文 */
+"The key is empty." = "Key 为空。";
+"Expected the key to start with \"%@\"." = "Key 应以 “%@” 开头。";
+"The key looks too short." = "Key 看起来太短了。";
+"The key format doesn't look right." = "Key 格式看起来不对。";
