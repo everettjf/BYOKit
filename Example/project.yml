@@ -1,0 +1,25 @@
+name: AnyLLMDemo
+options:
+  bundleIdPrefix: com.anyllm.demo
+  deploymentTarget:
+    iOS: "17.0"
+    macOS: "14.0"
+packages:
+  AnyLLM:
+    path: ..
+targets:
+  AnyLLMDemo:
+    type: application
+    platform: [iOS, macOS]
+    sources: [Sources]
+    dependencies:
+      - package: AnyLLM
+        product: AnyLLM
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "5.0"
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_CFBundleDisplayName: AnyLLM

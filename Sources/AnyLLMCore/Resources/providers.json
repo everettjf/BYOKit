@@ -1,0 +1,348 @@
+{
+  "version": 1,
+  "providers": [
+    {
+      "id": "openai",
+      "displayName": "OpenAI",
+      "kind": "cloud",
+      "apiFormat": "openai",
+      "appearance": { "symbolName": "sparkles", "monogram": "AI", "tintHex": "#10A37F" },
+      "defaultBaseURL": "https://api.openai.com/v1",
+      "allowsCustomBaseURL": true,
+      "credential": {
+        "requiresAPIKey": true,
+        "keyDisplayName": "API Key",
+        "validation": { "prefix": "sk-", "minLength": 20 },
+        "extraFields": []
+      },
+      "onboarding": {
+        "consoleURL": "https://platform.openai.com/api-keys",
+        "signUpURL": "https://platform.openai.com/signup",
+        "docsURL": "https://platform.openai.com/docs",
+        "pricingURL": "https://openai.com/api/pricing",
+        "steps": [
+          { "id": 1, "text": "Sign in to the OpenAI platform.", "symbolName": "person.crop.circle" },
+          { "id": 2, "text": "Open the API keys page and tap “Create new secret key”.", "actionURL": "https://platform.openai.com/api-keys", "symbolName": "key" },
+          { "id": 3, "text": "Copy the key (shown only once) and paste it here.", "symbolName": "doc.on.clipboard" }
+        ],
+        "notes": ["Requires a paid account with billing set up."]
+      },
+      "models": {
+        "supportsDynamicListing": true,
+        "presets": [
+          { "id": "gpt-4o", "displayName": "GPT-4o", "contextWindow": 128000, "capabilities": ["vision", "tools"] },
+          { "id": "gpt-4o-mini", "displayName": "GPT-4o mini", "contextWindow": 128000, "capabilities": ["vision", "tools"] },
+          { "id": "o4-mini", "displayName": "o4-mini", "contextWindow": 200000, "capabilities": ["reasoning", "tools"] },
+          { "id": "o3", "displayName": "o3", "contextWindow": 200000, "capabilities": ["reasoning", "tools"] }
+        ]
+      }
+    },
+    {
+      "id": "anthropic",
+      "displayName": "Anthropic",
+      "kind": "cloud",
+      "apiFormat": "anthropic",
+      "appearance": { "symbolName": "a.circle", "monogram": "AN", "tintHex": "#D97757" },
+      "defaultBaseURL": "https://api.anthropic.com",
+      "allowsCustomBaseURL": true,
+      "credential": {
+        "requiresAPIKey": true,
+        "keyDisplayName": "API Key",
+        "validation": { "prefix": "sk-ant-", "minLength": 20 },
+        "extraFields": []
+      },
+      "onboarding": {
+        "consoleURL": "https://console.anthropic.com/settings/keys",
+        "signUpURL": "https://console.anthropic.com",
+        "docsURL": "https://docs.anthropic.com",
+        "pricingURL": "https://www.anthropic.com/pricing",
+        "steps": [
+          { "id": 1, "text": "Sign in to the Anthropic Console.", "symbolName": "person.crop.circle" },
+          { "id": 2, "text": "Go to Settings → API Keys and create a key.", "actionURL": "https://console.anthropic.com/settings/keys", "symbolName": "key" },
+          { "id": 3, "text": "Copy the key and paste it here.", "symbolName": "doc.on.clipboard" }
+        ],
+        "notes": ["Requires prepaid credits or billing enabled."]
+      },
+      "models": {
+        "supportsDynamicListing": true,
+        "presets": [
+          { "id": "claude-sonnet-4-5", "displayName": "Claude Sonnet 4.5", "contextWindow": 200000, "capabilities": ["vision", "tools", "reasoning"] },
+          { "id": "claude-opus-4-1", "displayName": "Claude Opus 4.1", "contextWindow": 200000, "capabilities": ["vision", "tools", "reasoning"] },
+          { "id": "claude-3-5-haiku-latest", "displayName": "Claude 3.5 Haiku", "contextWindow": 200000, "capabilities": ["tools"] }
+        ]
+      }
+    },
+    {
+      "id": "gemini",
+      "displayName": "Google Gemini",
+      "kind": "cloud",
+      "apiFormat": "gemini",
+      "appearance": { "symbolName": "diamond", "monogram": "GG", "tintHex": "#4285F4" },
+      "defaultBaseURL": "https://generativelanguage.googleapis.com/v1beta",
+      "allowsCustomBaseURL": false,
+      "credential": {
+        "requiresAPIKey": true,
+        "keyDisplayName": "API Key",
+        "validation": { "prefix": "AIza", "minLength": 20 },
+        "extraFields": []
+      },
+      "onboarding": {
+        "consoleURL": "https://aistudio.google.com/app/apikey",
+        "signUpURL": "https://aistudio.google.com",
+        "docsURL": "https://ai.google.dev/gemini-api/docs",
+        "pricingURL": "https://ai.google.dev/pricing",
+        "steps": [
+          { "id": 1, "text": "Open Google AI Studio and sign in.", "symbolName": "person.crop.circle" },
+          { "id": 2, "text": "Tap “Get API key” → “Create API key”.", "actionURL": "https://aistudio.google.com/app/apikey", "symbolName": "key" },
+          { "id": 3, "text": "Copy the key and paste it here.", "symbolName": "doc.on.clipboard" }
+        ],
+        "notes": ["A generous free tier is available."]
+      },
+      "models": {
+        "supportsDynamicListing": true,
+        "presets": [
+          { "id": "gemini-2.0-flash", "displayName": "Gemini 2.0 Flash", "contextWindow": 1048576, "capabilities": ["vision", "tools"] },
+          { "id": "gemini-1.5-pro", "displayName": "Gemini 1.5 Pro", "contextWindow": 2097152, "capabilities": ["vision", "tools"] },
+          { "id": "gemini-1.5-flash", "displayName": "Gemini 1.5 Flash", "contextWindow": 1048576, "capabilities": ["vision", "tools"] }
+        ]
+      }
+    },
+    {
+      "id": "deepseek",
+      "displayName": "DeepSeek",
+      "kind": "cloud",
+      "apiFormat": "openai",
+      "appearance": { "symbolName": "magnifyingglass", "monogram": "DS", "tintHex": "#4D6BFE" },
+      "defaultBaseURL": "https://api.deepseek.com/v1",
+      "allowsCustomBaseURL": false,
+      "credential": {
+        "requiresAPIKey": true,
+        "keyDisplayName": "API Key",
+        "validation": { "prefix": "sk-", "minLength": 20 },
+        "extraFields": []
+      },
+      "onboarding": {
+        "consoleURL": "https://platform.deepseek.com/api_keys",
+        "signUpURL": "https://platform.deepseek.com/sign_up",
+        "docsURL": "https://api-docs.deepseek.com",
+        "pricingURL": "https://api-docs.deepseek.com/quick_start/pricing",
+        "steps": [
+          { "id": 1, "text": "Sign in to the DeepSeek platform.", "symbolName": "person.crop.circle" },
+          { "id": 2, "text": "Open “API keys” and create a new key.", "actionURL": "https://platform.deepseek.com/api_keys", "symbolName": "key" },
+          { "id": 3, "text": "Copy the key and paste it here.", "symbolName": "doc.on.clipboard" }
+        ],
+        "notes": []
+      },
+      "models": {
+        "supportsDynamicListing": true,
+        "presets": [
+          { "id": "deepseek-chat", "displayName": "DeepSeek Chat", "contextWindow": 64000, "capabilities": ["tools"] },
+          { "id": "deepseek-reasoner", "displayName": "DeepSeek Reasoner", "contextWindow": 64000, "capabilities": ["reasoning"] }
+        ]
+      }
+    },
+    {
+      "id": "openrouter",
+      "displayName": "OpenRouter",
+      "kind": "compatible",
+      "apiFormat": "openai",
+      "appearance": { "symbolName": "arrow.triangle.branch", "monogram": "OR", "tintHex": "#6467F2" },
+      "defaultBaseURL": "https://openrouter.ai/api/v1",
+      "allowsCustomBaseURL": false,
+      "credential": {
+        "requiresAPIKey": true,
+        "keyDisplayName": "API Key",
+        "validation": { "prefix": "sk-or-", "minLength": 20 },
+        "extraFields": []
+      },
+      "onboarding": {
+        "consoleURL": "https://openrouter.ai/keys",
+        "signUpURL": "https://openrouter.ai",
+        "docsURL": "https://openrouter.ai/docs",
+        "pricingURL": "https://openrouter.ai/models",
+        "steps": [
+          { "id": 1, "text": "Sign in to OpenRouter.", "symbolName": "person.crop.circle" },
+          { "id": 2, "text": "Open the Keys page and create a key.", "actionURL": "https://openrouter.ai/keys", "symbolName": "key" },
+          { "id": 3, "text": "Copy the key and paste it here.", "symbolName": "doc.on.clipboard" }
+        ],
+        "notes": ["One key, hundreds of models across providers."]
+      },
+      "models": {
+        "supportsDynamicListing": true,
+        "presets": [
+          { "id": "openai/gpt-4o", "displayName": "OpenAI: GPT-4o", "capabilities": ["vision", "tools"] },
+          { "id": "anthropic/claude-sonnet-4.5", "displayName": "Anthropic: Claude Sonnet 4.5", "capabilities": ["vision", "tools", "reasoning"] },
+          { "id": "google/gemini-2.0-flash-001", "displayName": "Google: Gemini 2.0 Flash", "capabilities": ["vision", "tools"] }
+        ]
+      }
+    },
+    {
+      "id": "groq",
+      "displayName": "Groq",
+      "kind": "cloud",
+      "apiFormat": "openai",
+      "appearance": { "symbolName": "bolt", "monogram": "GQ", "tintHex": "#F55036" },
+      "defaultBaseURL": "https://api.groq.com/openai/v1",
+      "allowsCustomBaseURL": false,
+      "credential": {
+        "requiresAPIKey": true,
+        "keyDisplayName": "API Key",
+        "validation": { "prefix": "gsk_", "minLength": 20 },
+        "extraFields": []
+      },
+      "onboarding": {
+        "consoleURL": "https://console.groq.com/keys",
+        "signUpURL": "https://console.groq.com",
+        "docsURL": "https://console.groq.com/docs",
+        "pricingURL": "https://groq.com/pricing",
+        "steps": [
+          { "id": 1, "text": "Sign in to the Groq Console.", "symbolName": "person.crop.circle" },
+          { "id": 2, "text": "Open “API Keys” and create a key.", "actionURL": "https://console.groq.com/keys", "symbolName": "key" },
+          { "id": 3, "text": "Copy the key and paste it here.", "symbolName": "doc.on.clipboard" }
+        ],
+        "notes": ["Very fast inference; free tier available."]
+      },
+      "models": {
+        "supportsDynamicListing": true,
+        "presets": [
+          { "id": "llama-3.3-70b-versatile", "displayName": "Llama 3.3 70B", "contextWindow": 128000, "capabilities": ["tools"] },
+          { "id": "llama-3.1-8b-instant", "displayName": "Llama 3.1 8B Instant", "contextWindow": 128000, "capabilities": ["tools"] }
+        ]
+      }
+    },
+    {
+      "id": "mistral",
+      "displayName": "Mistral AI",
+      "kind": "cloud",
+      "apiFormat": "openai",
+      "appearance": { "symbolName": "wind", "monogram": "MS", "tintHex": "#FA520F" },
+      "defaultBaseURL": "https://api.mistral.ai/v1",
+      "allowsCustomBaseURL": false,
+      "credential": {
+        "requiresAPIKey": true,
+        "keyDisplayName": "API Key",
+        "validation": { "minLength": 20 },
+        "extraFields": []
+      },
+      "onboarding": {
+        "consoleURL": "https://console.mistral.ai/api-keys",
+        "signUpURL": "https://console.mistral.ai",
+        "docsURL": "https://docs.mistral.ai",
+        "pricingURL": "https://mistral.ai/pricing",
+        "steps": [
+          { "id": 1, "text": "Sign in to La Plateforme.", "symbolName": "person.crop.circle" },
+          { "id": 2, "text": "Open “API Keys” and create a key.", "actionURL": "https://console.mistral.ai/api-keys", "symbolName": "key" },
+          { "id": 3, "text": "Copy the key and paste it here.", "symbolName": "doc.on.clipboard" }
+        ],
+        "notes": []
+      },
+      "models": {
+        "supportsDynamicListing": true,
+        "presets": [
+          { "id": "mistral-large-latest", "displayName": "Mistral Large", "contextWindow": 128000, "capabilities": ["tools"] },
+          { "id": "mistral-small-latest", "displayName": "Mistral Small", "contextWindow": 128000, "capabilities": ["tools"] }
+        ]
+      }
+    },
+    {
+      "id": "xai",
+      "displayName": "xAI (Grok)",
+      "kind": "cloud",
+      "apiFormat": "openai",
+      "appearance": { "symbolName": "x.circle", "monogram": "xAI", "tintHex": "#111111" },
+      "defaultBaseURL": "https://api.x.ai/v1",
+      "allowsCustomBaseURL": false,
+      "credential": {
+        "requiresAPIKey": true,
+        "keyDisplayName": "API Key",
+        "validation": { "prefix": "xai-", "minLength": 20 },
+        "extraFields": []
+      },
+      "onboarding": {
+        "consoleURL": "https://console.x.ai",
+        "signUpURL": "https://console.x.ai",
+        "docsURL": "https://docs.x.ai",
+        "pricingURL": "https://docs.x.ai/docs/models",
+        "steps": [
+          { "id": 1, "text": "Sign in to the xAI Console.", "symbolName": "person.crop.circle" },
+          { "id": 2, "text": "Create an API key.", "actionURL": "https://console.x.ai", "symbolName": "key" },
+          { "id": 3, "text": "Copy the key and paste it here.", "symbolName": "doc.on.clipboard" }
+        ],
+        "notes": []
+      },
+      "models": {
+        "supportsDynamicListing": true,
+        "presets": [
+          { "id": "grok-2-latest", "displayName": "Grok 2", "contextWindow": 131072, "capabilities": ["tools"] },
+          { "id": "grok-2-vision-latest", "displayName": "Grok 2 Vision", "contextWindow": 32768, "capabilities": ["vision", "tools"] }
+        ]
+      }
+    },
+    {
+      "id": "ollama",
+      "displayName": "Ollama",
+      "kind": "local",
+      "apiFormat": "ollama",
+      "appearance": { "symbolName": "desktopcomputer", "monogram": "OL", "tintHex": "#0A0A0A" },
+      "defaultBaseURL": "http://localhost:11434",
+      "allowsCustomBaseURL": true,
+      "credential": {
+        "requiresAPIKey": false,
+        "keyDisplayName": "API Key",
+        "validation": null,
+        "extraFields": []
+      },
+      "onboarding": {
+        "consoleURL": "https://ollama.com/download",
+        "signUpURL": null,
+        "docsURL": "https://github.com/ollama/ollama",
+        "pricingURL": null,
+        "steps": [
+          { "id": 1, "text": "Install Ollama on your machine.", "actionURL": "https://ollama.com/download", "symbolName": "arrow.down.circle" },
+          { "id": 2, "text": "Pull a model, e.g. run “ollama pull llama3.2”.", "symbolName": "terminal" },
+          { "id": 3, "text": "Make sure Ollama is running, then test the connection.", "symbolName": "bolt.horizontal.circle" }
+        ],
+        "notes": ["Runs locally — no API key, no cost. Set the base URL if Ollama is on another host."]
+      },
+      "models": {
+        "supportsDynamicListing": true,
+        "presets": [
+          { "id": "llama3.2", "displayName": "Llama 3.2", "capabilities": ["tools"] },
+          { "id": "qwen2.5", "displayName": "Qwen 2.5", "capabilities": ["tools"] },
+          { "id": "phi4", "displayName": "Phi-4", "capabilities": [] }
+        ]
+      }
+    },
+    {
+      "id": "custom",
+      "displayName": "Custom (OpenAI-compatible)",
+      "kind": "compatible",
+      "apiFormat": "openai",
+      "appearance": { "symbolName": "slider.horizontal.3", "monogram": "API", "tintHex": "#6E7781" },
+      "defaultBaseURL": null,
+      "allowsCustomBaseURL": true,
+      "credential": {
+        "requiresAPIKey": false,
+        "keyDisplayName": "API Key",
+        "validation": null,
+        "extraFields": []
+      },
+      "onboarding": {
+        "consoleURL": null,
+        "signUpURL": null,
+        "docsURL": null,
+        "pricingURL": null,
+        "steps": [
+          { "id": 1, "text": "Enter the base URL of any OpenAI-compatible endpoint.", "symbolName": "link" },
+          { "id": 2, "text": "Add an API key if the endpoint requires one.", "symbolName": "key" },
+          { "id": 3, "text": "Test the connection to fetch available models.", "symbolName": "bolt.horizontal.circle" }
+        ],
+        "notes": ["Works with LM Studio, vLLM, LiteLLM, self-hosted gateways, and more."]
+      },
+      "models": {
+        "supportsDynamicListing": true,
+        "presets": []
+      }
+    }
+  ]
+}

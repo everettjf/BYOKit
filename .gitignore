@@ -1,0 +1,13 @@
+.DS_Store
+.build/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Example app
+Example/build/
+Example/build-mac/
+Example/AnyLLMDemo.xcodeproj/
+
+# SwiftPM
+Package.resolved
+.swiftpm/
