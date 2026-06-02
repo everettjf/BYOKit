@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BYOKit — Documentation &amp; Guide</title>
+<meta name="description" content="The complete guide to BYOKit: install, wire up the configuration store and settings UI, send completions, stream, localize, theme, add custom providers, and run on-device models.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fbfbfd; --fg:#15151b; --muted:#6a6a78; --line:#e9e9f1;
+    --card:#ffffff; --accent:#5b5bd6; --accent2:#7c5cff; --teal:#10a37f;
+    --code-bg:#1a1b26; --code-fg:#c3c8e0; --shadow:0 1px 2px rgba(20,20,40,.04),0 8px 30px rgba(20,20,40,.06);
+    --sidebar:288px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0c0c12; --fg:#ececf3; --muted:#9a9aac; --line:#22232e;
+      --card:#14141d; --code-bg:#0a0a10; --code-fg:#c3c8e0; --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 40px rgba(0,0,0,.35); }
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--fg);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    line-height:1.65;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.86em;
+    background:color-mix(in srgb,var(--accent) 10%,transparent);padding:.1em .4em;border-radius:6px}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+
+  /* nav */
+  nav{position:sticky;top:0;z-index:50;backdrop-filter:saturate(180%) blur(14px);
+    background:color-mix(in srgb,var(--bg) 80%,transparent);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;font-size:1.1rem;color:var(--fg)}
+  .brand:hover{text-decoration:none}
+  .logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:grid;place-items:center;color:#fff;font-weight:800;font-size:.8rem;box-shadow:0 4px 12px rgba(91,91,214,.35)}
+  .nav-links{display:flex;gap:24px;align-items:center;font-size:.92rem;font-weight:500}
+  .nav-links a{color:var(--fg)}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:11px;font-weight:600;font-size:.92rem;
+    border:1px solid transparent;cursor:pointer;transition:transform .12s ease, box-shadow .12s ease}
+  .btn:hover{text-decoration:none;transform:translateY(-1px)}
+  .btn-ghost{background:var(--card);color:var(--fg);border-color:var(--line)}
+  @media(max-width:900px){.nav-links a:not(.btn){display:none}}
+
+  /* layout */
+  .layout{display:grid;grid-template-columns:var(--sidebar) minmax(0,1fr);gap:48px;align-items:start;
+    max-width:1180px;margin:0 auto;padding:0 24px}
+  aside{position:sticky;top:60px;align-self:start;max-height:calc(100vh - 60px);overflow-y:auto;
+    padding:32px 0 60px;font-size:.9rem}
+  aside .grp{font-size:.74rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+    margin:22px 0 8px}
+  aside ul{list-style:none}
+  aside a{display:block;color:var(--muted);padding:5px 12px;border-radius:8px;border-left:2px solid transparent;
+    margin-left:-2px;font-weight:500}
+  aside a:hover{color:var(--fg);text-decoration:none;background:color-mix(in srgb,var(--accent) 7%,transparent)}
+  aside a.active{color:var(--accent);border-left-color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,transparent)}
+
+  main{padding:36px 0 120px;min-width:0}
+  .lede{font-size:1.15rem;color:var(--muted);max-width:680px;margin-bottom:8px}
+  section{padding-top:36px;margin-top:8px;scroll-margin-top:72px}
+  section + section{border-top:1px solid var(--line);margin-top:40px}
+  h1{font-size:2.6rem;font-weight:800;letter-spacing:-.03em;line-height:1.1;margin-bottom:14px}
+  h2{font-size:1.7rem;font-weight:800;letter-spacing:-.02em;margin-bottom:12px;scroll-margin-top:72px}
+  h3{font-size:1.12rem;font-weight:700;margin:26px 0 8px}
+  h2 .num{color:var(--accent);font-weight:700;margin-right:10px;font-size:1.1rem;vertical-align:middle}
+  p{margin-bottom:14px;max-width:760px}
+  ul.bul,ol.num{margin:0 0 16px 22px;max-width:760px}
+  ul.bul li,ol.num li{margin-bottom:7px}
+  strong{font-weight:700}
+  .kicker{font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+
+  /* code */
+  .codeblock{position:relative;margin:0 0 18px}
+  .codeblock .lang{position:absolute;top:10px;right:14px;font-size:.68rem;font-weight:600;letter-spacing:.06em;
+    text-transform:uppercase;color:#6b7394}
+  .copy{position:absolute;top:8px;right:60px;background:rgba(255,255,255,.06);color:#c3c8e0;border:1px solid rgba(255,255,255,.12);
+    border-radius:7px;font-size:.72rem;padding:3px 9px;cursor:pointer;font-family:'Inter',sans-serif;opacity:0;transition:opacity .15s}
+  .codeblock:hover .copy{opacity:1}
+  .copy:hover{background:rgba(255,255,255,.14)}
+  pre{background:var(--code-bg);color:var(--code-fg);border-radius:14px;padding:22px;overflow:auto;
+    font-family:'JetBrains Mono',monospace;font-size:.84rem;line-height:1.7;border:1px solid rgba(255,255,255,.06)}
+  pre code{background:none;padding:0;font-size:1em}
+  pre .k{color:#bb9af7}  pre .t{color:#7dcfff}  pre .s{color:#9ece6a}
+  pre .c{color:#565f89;font-style:italic}  pre .f{color:#7aa2f7}  pre .n{color:#ff9e64}
+
+  /* callouts */
+  .note,.tip,.warn{border-radius:12px;padding:14px 18px;margin:0 0 18px;border:1px solid var(--line);
+    background:var(--card);font-size:.95rem;max-width:760px}
+  .note{border-left:3px solid var(--accent)}
+  .tip{border-left:3px solid var(--teal)}
+  .warn{border-left:3px solid #e0a020}
+  .note b,.tip b,.warn b{display:block;margin-bottom:3px}
+
+  /* table */
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;margin:0 0 18px;background:var(--card);box-shadow:var(--shadow)}
+  table{width:100%;border-collapse:collapse;font-size:.9rem}
+  th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  th{font-weight:700;color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}
+  td code{color:var(--accent);background:none;padding:0}
+
+  /* step flow */
+  .flow{counter-reset:step;margin:8px 0 4px}
+  .flow .step{position:relative;padding:0 0 8px 52px;margin-bottom:18px}
+  .flow .step::before{counter-increment:step;content:counter(step);position:absolute;left:0;top:-2px;
+    width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#fff;font-weight:800;display:grid;place-items:center;font-size:.95rem;box-shadow:0 4px 12px rgba(91,91,214,.3)}
+  .flow .step h3{margin-top:2px}
+
+  .pillrow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 16px}
+  .chip{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border:1px solid var(--line);border-radius:10px;
+    background:var(--card);font-size:.85rem;font-weight:600}
+  .sw{width:20px;height:20px;border-radius:6px;display:grid;place-items:center;color:#fff;font-size:.58rem;font-weight:700;flex:none}
+
+  .shots{display:flex;gap:14px;margin:24px 0 8px;flex-wrap:wrap}
+  .shots img{width:180px;border-radius:18px;border:1px solid var(--line);box-shadow:var(--shadow)}
+  @media(max-width:520px){.shots img{width:46%}}
+
+  footer{border-top:1px solid var(--line);padding:40px 0;text-align:center;color:var(--muted);font-size:.9rem;margin-top:40px}
+
+  .menu-btn{display:none;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:7px 12px;
+    font-size:.9rem;font-weight:600;color:var(--fg);cursor:pointer}
+  @media(max-width:860px){
+    .layout{grid-template-columns:1fr;gap:0}
+    aside{position:fixed;top:60px;left:0;width:280px;height:calc(100vh - 60px);background:var(--bg);
+      border-right:1px solid var(--line);padding:24px 20px;transform:translateX(-100%);transition:transform .22s ease;z-index:40}
+    aside.open{transform:translateX(0)}
+    aside a:not(.btn){display:block}
+    .menu-btn{display:inline-block}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="logo">LLM</span> BYOKit</a>
+    <div class="nav-links">
+      <button class="menu-btn" id="menuBtn" aria-label="Toggle navigation">☰ Contents</button>
+      <a href="index.html">Home</a>
+      <a href="index.html#features">Features</a>
+      <a href="index.html#providers">Providers</a>
+      <a class="btn btn-ghost" href="https://github.com/everettjf/BYOKit">GitHub ↗</a>
+    </div>
+  </div>
+</nav>
+
+<div class="layout">
+  <aside id="sidebar">
+    <div class="grp">Getting started</div>
+    <ul>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#how">How it fits together</a></li>
+      <li><a href="#install">Installation</a></li>
+      <li><a href="#quickstart">Quick start</a></li>
+      <li><a href="#flow">The complete flow</a></li>
+    </ul>
+    <div class="grp">Core concepts</div>
+    <ul>
+      <li><a href="#registry">Providers &amp; registry</a></li>
+      <li><a href="#store">ConfigurationStore</a></li>
+      <li><a href="#resolved">ResolvedConfiguration</a></li>
+      <li><a href="#client">LLMClient</a></li>
+    </ul>
+    <div class="grp">Using models</div>
+    <ul>
+      <li><a href="#complete">Sending a completion</a></li>
+      <li><a href="#streaming">Streaming</a></li>
+      <li><a href="#validate">Testing &amp; validation</a></li>
+      <li><a href="#models">Model selection</a></li>
+    </ul>
+    <div class="grp">Tailoring the UI</div>
+    <ul>
+      <li><a href="#theme">Theming</a></li>
+      <li><a href="#filter">Limiting providers</a></li>
+      <li><a href="#components">Reusable components</a></li>
+      <li><a href="#l10n">Localization</a></li>
+    </ul>
+    <div class="grp">Going further</div>
+    <ul>
+      <li><a href="#ondevice">On-device models</a></li>
+      <li><a href="#custom-provider">Add a provider</a></li>
+      <li><a href="#custom-client">Custom LLMClient</a></li>
+      <li><a href="#ota">Remote catalog (OTA)</a></li>
+    </ul>
+    <div class="grp">Reference</div>
+    <ul>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#testing">Testing</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+  </aside>
+
+  <main>
+    <div class="kicker">Documentation</div>
+    <h1>The BYOKit guide</h1>
+    <p class="lede">Everything you need to add a production-grade <strong>Bring-Your-Own-Key</strong>
+      LLM configuration experience to an iOS, iPadOS, or macOS app — from the one-line settings
+      screen to streaming completions, custom providers, and on-device models.</p>
+
+    <div class="shots">
+      <img src="assets/screen-list.png" alt="Providers list">
+      <img src="assets/screen-form.png" alt="Configuration form">
+      <img src="assets/screen-onboarding.png" alt="Get-a-key onboarding guide">
+      <img src="assets/screen-picker.png" alt="Provider picker">
+    </div>
+
+    <!-- OVERVIEW -->
+    <section id="overview">
+      <h2>Overview</h2>
+      <p>BYOKit is a Swift Package that ships the part of a BYOK app everyone rebuilds by hand:
+        the <strong>configuration UX</strong>. Calling an LLM is the easy bit; the work is the
+        provider list, the "where do I get a key?" onboarding, key validation, one-tap connection
+        testing, custom base URLs, Keychain storage, and multi-key management. BYOKit gives you
+        all of it as polished, themeable SwiftUI, and keeps the model calls behind a swappable
+        protocol so you can use any engine you like.</p>
+      <p>It is built in layers, so you take only what you need:</p>
+      <ul class="bul">
+        <li><strong>Data-driven</strong> — the provider catalog lives in <code>providers.json</code>;
+          adding a provider is usually a JSON entry, no code.</li>
+        <li><strong>Secure by default</strong> — keys go to the Keychain; the UI masks them; connection
+          tests use a minimal request.</li>
+        <li><strong>Dependency-free core</strong> — <code>BYOKitCore</code> and the base <code>BYOKit</code>
+          library pull in nothing third-party. Only the optional on-device adapter adds a dependency.</li>
+        <li><strong>Swappable engine</strong> — <code>DefaultLLMClient</code> speaks OpenAI, Anthropic,
+          Gemini, and Ollama over <code>URLSession</code>; conform to <code>LLMClient</code> to use anything else.</li>
+      </ul>
+    </section>
+
+    <!-- HOW IT FITS -->
+    <section id="how">
+      <h2>How it fits together</h2>
+      <p>There are three objects you actually touch. Understanding their roles makes everything
+        else click into place:</p>
+      <div class="tablewrap">
+      <table>
+        <tr><th>Object</th><th>What it is</th><th>You use it to…</th></tr>
+        <tr><td><code>ConfigurationStore</code></td><td>An <code>ObservableObject</code> that owns the list of
+          configurations, the active selection, and brokers secrets through the Keychain.</td>
+          <td>Hold state. Create one, inject it, read <code>activeConfiguration</code>.</td></tr>
+        <tr><td><code>BYOKSettingsView</code></td><td>The full settings center — list, add, edit, reorder,
+          delete, choose the active provider, onboarding.</td>
+          <td>Render the entire BYOK screen in one line.</td></tr>
+        <tr><td><code>LLMClient</code></td><td>The protocol that talks to a provider. <code>DefaultLLMClient</code>
+          is the built-in URLSession implementation.</td>
+          <td>Validate, list models, complete, and stream.</td></tr>
+      </table>
+      </div>
+      <p>The flow of data is simple: the <strong>store</strong> persists what the user configured →
+        you combine the chosen configuration, its provider definition, and the secret into a
+        <strong><code>ResolvedConfiguration</code></strong> → you hand that to an <strong><code>LLMClient</code></strong>
+        to make a request.</p>
+    </section>
+
+    <!-- INSTALL -->
+    <section id="install">
+      <h2>Installation</h2>
+      <p><strong>Requirements:</strong> iOS 17 · iPadOS 17 · macOS 14, and the Swift 6.1 toolchain.</p>
+
+      <h3>Xcode</h3>
+      <p><em>File ▸ Add Package Dependencies…</em> → paste the repository URL →
+        choose <strong>Up to Next Major Version</strong>. Xcode fills in the latest release for you.</p>
+      <div class="codeblock"><span class="lang">url</span><button class="copy">Copy</button><pre><code>https://github.com/everettjf/BYOKit</code></pre></div>
+
+      <h3>Package.swift</h3>
+      <div class="codeblock"><span class="lang">swift</span><button class="copy">Copy</button><pre><code><span class="k">dependencies</span>: [
+    .<span class="f">package</span>(url: <span class="s">"https://github.com/everettjf/BYOKit"</span>, from: <span class="s">"1.0.0"</span>)
+]</code></pre></div>
+      <div class="note"><b>Why "1.0.0" never needs updating</b>
+        <code>from:</code> sets a <em>floor</em>, not a pin. SwiftPM always resolves the newest
+        compatible release, so this line stays correct for every future version — you never edit it on release day.</div>
+
+      <p>Add the <code>BYOKit</code> product (the umbrella that re-exports every layer). If you only
+        need the data layer, depend on <code>BYOKitCore</code>; for just the UI, <code>BYOKitUI</code>.</p>
+      <div class="codeblock"><span class="lang">swift</span><button class="copy">Copy</button><pre><code><span class="k">import</span> BYOKit  <span class="c">// re-exports Core · Store · Client · UI</span></code></pre></div>
+    </section>
+
+    <!-- QUICK START -->
+    <section id="quickstart">
+      <h2>Quick start</h2>
+      <p>Two steps to a working BYOK screen: create a store, then render the settings view with a client.</p>
+      <div class="codeblock"><span class="lang">swift</span><button class="copy">Copy</button><pre><code><span class="k">import</span> SwiftUI
+<span class="k">import</span> BYOKit
+
+<span class="k">@main</span>
+<span class="k">struct</span> <span class="t">MyApp</span>: <span class="t">App</span> {
+    <span class="c">// Keychain-backed secrets + UserDefaults-backed configuration list.</span>
+    <span class="k">@StateObject private var</span> store = <span class="t">ConfigurationStore</span>()
+
+    <span class="k">var</span> body: <span class="k">some</span> <span class="t">Scene</span> {
+        <span class="t">WindowGroup</span> {
+            <span class="t">BYOKSettingsView</span>()
+                .<span class="f">environmentObject</span>(store)              <span class="c">// required</span>
+                .<span class="f">byokClient</span>(<span class="t">DefaultLLMClient</span>())     <span class="c">// or your own LLMClient</span>
+        }
+    }
+}</code></pre></div>
+      <div class="tip"><b>That's the whole UI.</b> The user can now add providers, paste keys (stored in the
+        Keychain, masked in the UI), follow the per-provider onboarding guide, run a connection test,
+        pick a model, and choose which configuration is active — with no further code.</div>
+    </section>
+
+    <!-- COMPLETE FLOW -->
+    <section id="flow">
+      <h2>The complete flow</h2>
+      <p>Here is the end-to-end path from a fresh app to a streamed answer, step by step.</p>
+      <div class="flow">
+        <div class="step">
+          <h3>Create &amp; inject the store</h3>
+          <p>One <code>ConfigurationStore</code> for the app, injected as an environment object.
+            It loads any previously saved configurations on init.</p>
+          <div class="codeblock"><span class="lang">swift</span><button class="copy">Copy</button><pre><code><span class="k">@StateObject private var</span> store = <span class="t">ConfigurationStore</span>()</code></pre></div>
+        </div>
+        <div class="step">
+          <h3>Let the user configure a provider</h3>
+          <p>Present <code>BYOKSettingsView()</code>. The user picks a provider, follows the
+            onboarding to get a key, pastes it, and taps <em>Test Connection</em>. BYOKit persists
+            the configuration and saves the key to the Keychain.</p>
+        </div>
+        <div class="step">
+          <h3>Resolve the active configuration</h3>
+          <p>When you want to make a request, build a <code>ResolvedConfiguration</code> from the
+            active config, its provider definition, and the stored key.</p>
+          <div class="codeblock"><span class="lang">swift</span><button class="copy">Copy</button><pre><code><span class="k">func</span> <span class="f">resolveActive</span>() <span class="k">async</span> -&gt; <span class="t">ResolvedConfiguration</span>? {
+    <span class="k">guard let</span> config = store.activeConfiguration,
+          <span class="k">let</span> provider = <span class="k">await</span> <span class="t">ProviderRegistry</span>.shared.<span class="f">provider</span>(config.providerID)
+    <span class="k">else</span> { <span class="k">return nil</span> }
+
+    <span class="k">return</span> <span class="t">ResolvedConfiguration</span>(
+        provider: provider,
+        configuration: config,
+        apiKey: store.<span class="f">apiKey</span>(for: config.id)
+    )
+}</code></pre></div>
+        </div>
+        <div class="step">
+          <h3>Send a request</h3>
+          <p>Hand the resolved configuration to any <code>LLMClient</code>.</p>
+          <div class="codeblock"><span class="lang">swift</span><button class="copy">Copy</button><pre><code><span class="k">guard let</span> resolved = <span class="k">await</span> <span class="f">resolveActive</span>() <span class="k">else</span> { <span class="k">return</span> }
+<span class="k">let</span> client = <span class="t">DefaultLLMClient</span>()
+<span class="k">let</span> reply = <span class="k">try await</span> client.<span class="f">complete</span>(.<span class="f">text</span>(<span class="s">"Write a haiku about Swift"</span>), with: resolved)
+<span class="f">print</span>(reply.text)</code></pre></div>
+        </div>
+        <div class="step">
+          <h3>Or stream it</h3>
+          <p>Swap <code>complete</code> for <code>streamComplete</code> to render tokens as they arrive.</p>
+          <div class="codeblock"><span class="lang">swift</span><button class="copy">Copy</button><pre><code><span class="k">for try await</span> delta <span class="k">in</span> client.<span class="f">streamComplete</span>(.<span class="f">text</span>(<span class="s">"Write a haiku"</span>), with: resolved) {
+    text += delta   <span class="c">// each value is a delta — append for the running text</span>
+}</code></pre></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REGISTRY -->
+    <section id="registry">
+      <h2>Providers &amp; the registry</h2>
+      <p>A <code>Provider</code> is a value type describing one service: its display name, brand
+        appearance, API format, default base URL, credential rules, onboarding guide, and model
+        presets. The full catalog is served by <code>ProviderRegistry</code>, an actor with a
+        shared instance loaded from the bundled <code>providers.json</code>.</p>
+      <div class="pillrow">
+        <span class="chip"><span class="sw" style="background:#10a37f">AI</span> OpenAI</span>
+        <span class="chip"><span class="sw" style="background:#d97757">AN</span> Anthropic</span>
+        <span class="chip"><span class="sw" style="background:#4285f4">GG</span> Gemini</span>
+        <span class="chip"><span class="sw" style="background:#4d6bfe">DS</span> DeepSeek</span>
+        <span class="chip"><span class="sw" style="background:#6467f2">OR</span> OpenRouter</span>
+        <span class="chip"><span class="sw" style="background:#f55036">GQ</span> Groq</span>
+        <span class="chip"><span class="sw" style="background:#fa520f">MS</span> Mistral</span>
+        <span class="chip"><span class="sw" style="background:#111">xAI</span> Grok</span>
+        <span class="chip"><span class="sw" style="background:#0a0a0a">OL</span> Ollama</span>
+        <span class="chip"><span class="sw" style="background:#6e7781">API</span> Custom</span>
+      </div>
+      <div class="codeblock"><span class="lang">swift</span><button class="copy">Copy</button><pre><code><span class="k">let</span> registry = <span class="t">ProviderRegistry</span>.shared
+
+<span class="k">let</span> all      = <span class="k">await</span> registry.<span class="f">all</span>()                       <span class="c">// every provider, in display order</span>
+<span class="k">let</span> openAI   = <span class="k">await</span> registry.<span class="f">provider</span>(.openAI)            <span class="c">// look up by id</span>
+<span class="k">let</span> cloud    = <span class="k">await</span> registry.<span class="f">providers</span>(.<span class="f">kinds</span>(.cloud))     <span class="c">// filter by kind</span>
+<span class="k">let</span> subset   = <span class="k">await</span> registry.<span class="f">providers</span>(.<span class="f">only</span>(.openAI, .anthropic))</code></pre></div>
+      <p>Built-in ids have convenience shortcuts (<code>.openAI</code>, <code>.anthropic</code>,
+        <code>.gemini</code>, <code>.ollama</code>); any other id is just a string literal, e.g.
+        <code>"deepseek"</code>.</p>
+    </section>
+
+    <!-- STORE -->
+    <section id="store">
+      <h2>ConfigurationStore</h2>
+      <p>The app-facing source of truth. It is <code>@MainActor</code> and an
+        <code>ObservableObject</code>, so SwiftUI views update automatically. It owns the
+        configurations, the active selection, and a <code>CredentialStore</code> for secrets.</p>
+      <h3>Reading state</h3>
+      <div class="codeblock"><span class="lang">swift</span><button class="copy">Copy</button><pre><code>store.configurations          <span class="c">// [LLMConfiguration] — the saved list</span>
+store.activeConfiguration     <span class="c">// the currently selected one, or nil</span>
+store.activeConfigurationID   <span class="c">// the active UUID (settable; persisted)</span>
+store.<span class="f">apiKey</span>(for: id)         <span class="c">// the Keychain-stored key for a config</span></code></pre></div>
+      <h3>Mutating state</h3>
+      <p>Adding programmatically (most apps just let <code>BYOKSettingsView</code> do this):</p>
+      <div class="codeblock"><span class="lang">swift</span><button class="copy">Copy</button><pre><code><span class="k">let</span> config = <span class="t">LLMConfiguration</span>(
+    providerID: .openAI,
+    displayName: <span class="s">"My OpenAI"</span>,
+    selectedModelID: <span class="s">"gpt-4o-mini"</span>
+)
+<span class="k">try</span> store.<span class="f">add</span>(config, apiKey: <span class="s">"sk-…"</span>)   <span class="c">// key → Keychain; becomes active if it's the first</span>
+
+store.<span class="f">update</span>(config)                  <span class="c">// non-secret fields</span>
+<span class="k">try</span> store.<span class="f">setAPIKey</span>(<span class="s">"sk-new"</span>, for: config.id)
+store.<span class="f">remove</span>(config.id)             <span class="c">// also deletes its secrets</span></code></pre></div>
+      <div class="note"><b>Custom storage</b>
+        The initializer accepts a <code>CredentialStore</code> and a <code>ConfigurationPersistence</code>.
+        The defaults are <code>KeychainCredentialStore</code> and <code>UserDefaultsConfigurationPersistence</code>;
+        pass <code>InMemoryCredentialStore()</code> in tests or previews.</div>
+    </section>
+
+    <!-- RESOLVED -->
+    <section id="resolved">
+      <h2>ResolvedConfiguration</h2>
+      <p>The bundle of everything needed to talk to an endpoint: a <code>Provider</code>, the user's
+        <code>LLMConfiguration</code>, and the resolved secret(s). It computes the effective base URL
+        (config override → provider default) and model id (selected → first preset) for you.</p>
+      <div class="codeblock"><span class="lang">swift</span><button class="copy">Copy</button><pre><code><span class="k">let</span> resolved = <span class="t">ResolvedConfiguration</span>(
+    provider: provider,
+    configuration: config,
+    apiKey: store.<span class="f">apiKey</span>(for: config.id)
+)
+
+resolved.baseURL   <span class="c">// effective endpoint</span>
+resolved.modelID   <span class="c">// effective model</span></code></pre></div>
+    </section>
+
+    <!-- CLIENT -->
+    <section id="client">
+      <h2>LLMClient</h2>
+      <p>The abstraction over "talking to a provider". <code>DefaultLLMClient</code> is the built-in
+        implementation — zero dependencies, <code>URLSession</code> only — and understands the
+        OpenAI, Anthropic, Gemini, and Ollama wire formats (including their streaming protocols).</p>
+      <div class="codeblock"><span class="lang">swift</span><button class="copy">Copy</button><pre><code><span class="k">public protocol</span> <span class="t">LLMClient</span>: <span class="t">Sendable</span> {
+    <span class="k">func</span> <span class="f">validate</span>(_ resolved: <span class="t">ResolvedConfiguration</span>) <span class="k">async throws</span> -&gt; <span class="t">ValidationResult</span>
+    <span class="k">func</span> <span class="f">listModels</span>(_ resolved: <span class="t">ResolvedConfiguration</span>) <span class="k">async throws</span> -&gt; [<span class="t">ModelInfo</span>]
+    <span class="k">func</span> <span class="f">complete</span>(_ request: <span class="t">CompletionRequest</span>, with resolved: <span class="t">ResolvedConfiguration</span>) <span class="k">async throws</span> -&gt; <span class="t">CompletionResponse</span>
+    <span class="k">func</span> <span class="f">streamComplete</span>(_ request: <span class="t">CompletionRequest</span>, with resolved: <span class="t">ResolvedConfiguration</span>) -&gt; <span class="t">AsyncThrowingStream</span>&lt;<span class="t">String</span>, <span class="t">Error</span>&gt;
+}</code></pre></div>
+      <p><code>streamComplete</code> has a default implementation that falls back to a single
+        <code>complete</code> call, so a custom client only needs to implement true streaming if it can.</p>
+    </section>
+
+    <!-- COMPLETE -->
+    <section id="complete">
+      <h2>Sending a completion</h2>
+      <p>A <code>CompletionRequest</code> is a list of <code>ChatMessage</code>s plus optional model,
+        token, and temperature overrides. For a one-shot prompt, <code>.text(_:)</code> is the shortcut.</p>
+      <div class="codeblock"><span class="lang">swift</span><button class="copy">Copy</button><pre><code><span class="c">// Shortcut: a single user message</span>
+<span class="k">let</span> reply = <span class="k">try await</span> client.<span class="f">complete</span>(.<span class="f">text</span>(<span class="s">"Summarize this"</span>), with: resolved)
+
+<span class="c">// Full control: system + history + parameters</span>
+<span class="k">let</span> request = <span class="t">CompletionRequest</span>(
+    messages: [
+        .<span class="f">system</span>(<span class="s">"You are a terse assistant."</span>),
+        .<span class="f">user</span>(<span class="s">"Explain actors in one sentence."</span>)
+    ],
+    model: <span class="s">"gpt-4o"</span>,        <span class="c">// overrides the configuration's model</span>
+    maxTokens: <span class="n">256</span>,
+    temperature: <span class="n">0.3</span>
+)
+<span class="k">let</span> response = <span class="k">try await</span> client.<span class="f">complete</span>(request, with: resolved)
+<span class="f">print</span>(response.text, response.modelID ?? <span class="s">""</span>)</code></pre></div>
+      <p>Errors are typed as <code>LLMClientError</code> (<code>.missingAPIKey</code>,
+        <code>.http(status:body:)</code>, <code>.transport</code>, …) and are localized.</p>
+    </section>
+
+    <!-- STREAMING -->
+    <section id="streaming">
+      <h2>Streaming</h2>
+      <p>Every <code>LLMClient</code> can stream. <code>DefaultLLMClient</code> parses the provider's
+        native stream — OpenAI / Anthropic / Gemini Server-Sent Events, Ollama NDJSON — and yields
+        each text <strong>delta</strong>. Concatenate the deltas to build the full response.</p>
+      <div class="codeblock"><span class="lang">swift</span><button class="copy">Copy</button><pre><code><span class="k">@MainActor @Observable</span>
+<span class="k">final class</span> <span class="t">ChatViewModel</span> {
+    <span class="k">var</span> output = <span class="s">""</span>
+
+    <span class="k">func</span> <span class="f">ask</span>(_ prompt: <span class="t">String</span>, _ resolved: <span class="t">ResolvedConfiguration</span>) <span class="k">async</span> {
+        output = <span class="s">""</span>
+        <span class="k">let</span> client = <span class="t">DefaultLLMClient</span>()
+        <span class="k">do</span> {
+            <span class="k">for try await</span> delta <span class="k">in</span> client.<span class="f">streamComplete</span>(.<span class="f">text</span>(prompt), with: resolved) {
+                output += delta
+            }
+        } <span class="k">catch</span> {
+            output = <span class="s">"Failed: \(error.localizedDescription)"</span>
+        }
+    }
+}</code></pre></div>
+      <div class="tip"><b>Clients that can't stream still work.</b> If a custom <code>LLMClient</code> doesn't
+        override <code>streamComplete</code>, the default runs <code>complete</code> and yields the whole
+        text as one chunk — your UI code stays the same.</div>
+    </section>
+
+    <!-- VALIDATE -->
+    <section id="validate">
+      <h2>Connection testing &amp; validation</h2>
+      <p>There are two layers of checking. <strong>Local key validation</strong> is instant and offline —
+        a <code>KeyValidation</code> on the provider checks prefix, length, and regex before any network
+        call. <strong>Connection testing</strong> actually probes the endpoint via
+        <code>client.validate(_:)</code>, returning latency and (when supported) the live model list.</p>
+      <div class="codeblock"><span class="lang">swift</span><button class="copy">Copy</button><pre><code><span class="k">let</span> result = <span class="k">try await</span> client.<span class="f">validate</span>(resolved)
+<span class="k">if</span> result.ok {
+    <span class="f">print</span>(<span class="s">"OK in \(result.latency ?? 0)s"</span>)
+    <span class="f">print</span>(result.detectedModels?.count ?? <span class="n">0</span>, <span class="s">"models"</span>)
+}</code></pre></div>
+      <p>In the UI this is the <em>Test Connection</em> button. You can drop the same affordance
+        anywhere with <code>ConnectionTestButton</code> (see <a href="#components">reusable components</a>).</p>
+    </section>
+
+    <!-- MODELS -->
+    <section id="models">
+      <h2>Model selection</h2>
+      <p>Each provider ships <strong>presets</strong> (curated <code>ModelInfo</code> values with display
+        names, context windows, and capability tags). Providers that support it can also list models
+        <strong>dynamically</strong> from the live API.</p>
+      <div class="codeblock"><span class="lang">swift</span><button class="copy">Copy</button><pre><code>provider.models.presets               <span class="c">// [ModelInfo] — always available</span>
+provider.models.supportsDynamicListing
+
+<span class="k">if</span> provider.models.supportsDynamicListing {
+    <span class="k">let</span> live = <span class="k">try await</span> client.<span class="f">listModels</span>(resolved)
+}</code></pre></div>
+      <p>The bundled <code>ModelPickerView</code> already merges presets with the live list when available.</p>
+    </section>
+
+    <!-- THEME -->
+    <section id="theme">
+      <h2>Theming</h2>
+      <p>Match the host app with a single modifier. <code>BYOKTheme</code> takes an accent color and a
+        corner radius; per-provider brand colors are preserved where it matters.</p>
+      <div class="codeblock"><span class="lang">swift</span><button class="copy">Copy</button><pre><code><span class="t">BYOKSettingsView</span>()
+    .<span class="f">environmentObject</span>(store)
+    .<span class="f">byokTheme</span>(<span class="t">BYOKTheme</span>(accent: .pink, cornerRadius: <span class="n">16</span>))</code></pre></div>
+    </section>
+
+    <!-- FILTER -->
+    <section id="filter">
+      <h2>Limiting which providers appear</h2>
+      <p>Two modifiers, depending on whether you want to filter the built-in catalog or supply your
+        own list entirely.</p>
+      <div class="codeblock"><span class="lang">swift</span><button class="copy">Copy</button><pre><code><span class="c">// Filter the built-in catalog</span>
+.<span class="f">byokProviders</span>(.<span class="f">only</span>(.openAI, .anthropic, .ollama))
+.<span class="f">byokProviders</span>(.<span class="f">kinds</span>(.cloud))
+
+<span class="c">// Or provide an explicit list (e.g. built-ins + your own)</span>
+<span class="k">let</span> builtins = <span class="k">await</span> <span class="t">ProviderRegistry</span>.shared.<span class="f">all</span>()
+.<span class="f">byokProviders</span>(builtins + [myCustomProvider])
+
+<span class="c">// Hide the "where do I get a key?" onboarding affordances</span>
+.<span class="f">byokShowsOnboarding</span>(<span class="k">false</span>)</code></pre></div>
+    </section>
+
+    <!-- COMPONENTS -->
+    <section id="components">
+      <h2>Reusable components</h2>
+      <p>Don't want the whole settings center? Every building block is public and usable on its own:</p>
+      <div class="tablewrap">
+      <table>
+        <tr><th>Component</th><th>Use</th></tr>
+        <tr><td><code>ProviderPickerView</code></td><td>The branded grid/list of providers.</td></tr>
+        <tr><td><code>ProviderConfigForm</code></td><td>The add/edit form for one configuration.</td></tr>
+        <tr><td><code>OnboardingGuideView</code></td><td>The "get a key" steps, notes, and deep links for a provider.</td></tr>
+        <tr><td><code>ConnectionTestButton</code></td><td>A self-contained test button with spinner + result state.</td></tr>
+        <tr><td><code>KeyField</code></td><td>A masked key field with inline validation hints.</td></tr>
+        <tr><td><code>ProviderBadge</code></td><td>The provider's brand icon/monogram at any size.</td></tr>
+        <tr><td><code>ModelPickerView</code></td><td>Preset + live model picker.</td></tr>
+      </table>
+      </div>
+    </section>
+
+    <!-- L10N -->
+    <section id="l10n">
+      <h2>Localization</h2>
+      <p>UI chrome, key-validation hints, and connection/error messages ship in
+        <strong>English and Simplified Chinese (zh-Hans)</strong>, resolved from the package's own
+        bundle. The host app's language selection decides which is shown — there's nothing to set up.
+        To preview Chinese in the simulator, set the scheme's <em>App Language</em> to Chinese, Simplified.</p>
+    </section>
+
+    <!-- ON-DEVICE -->
+    <section id="ondevice">
+      <h2>On-device models</h2>
+      <p>The optional <code>BYOKitClientAnyLanguageModel</code> product adds on-device inference via
+        <a href="https://github.com/huggingface/AnyLanguageModel">AnyLanguageModel</a>. It wraps a
+        fallback client, so every cloud/HTTP provider keeps working through <code>DefaultLLMClient</code>
+        while local providers are handled on-device.</p>
+      <h3>Apple Foundation Models</h3>
+      <div class="codeblock"><span class="lang">swift</span><button class="copy">Copy</button><pre><code><span class="k">import</span> BYOKitClientAnyLanguageModel
+
+<span class="k">let</span> builtins = <span class="k">await</span> <span class="t">ProviderRegistry</span>.shared.<span class="f">all</span>()
+
+<span class="t">BYOKSettingsView</span>()
+    .<span class="f">environmentObject</span>(store)
+    .<span class="f">byokClient</span>(<span class="t">AnyLanguageModelClient</span>())                 <span class="c">// adds on-device support</span>
+    .<span class="f">byokProviders</span>(builtins + [.appleFoundationModels])   <span class="c">// expose the Apple provider</span></code></pre></div>
+      <div class="note"><b>Stays lightweight</b>
+        Only depend on this product if you want local models — the base <code>BYOKit</code> library
+        remains dependency-free.</div>
+
+      <h3>MLX &amp; llama.cpp (opt-in traits)</h3>
+      <p>The adapter also serves on-device <strong>MLX</strong> (Apple Silicon) and
+        <strong>llama.cpp / GGUF</strong> models, gated behind package <strong>traits</strong> so the
+        heavy backends are only pulled in when you ask for them.</p>
+      <div class="codeblock"><span class="lang">swift</span><button class="copy">Copy</button><pre><code>.<span class="f">package</span>(url: <span class="s">"https://github.com/everettjf/BYOKit"</span>, from: <span class="s">"1.0.0"</span>,
+         traits: [<span class="s">"MLX"</span>, <span class="s">"Llama"</span>])     <span class="c">// enable the backends you want</span></code></pre></div>
+      <div class="codeblock"><span class="lang">swift</span><button class="copy">Copy</button><pre><code><span class="t">BYOKSettingsView</span>()
+    .<span class="f">byokClient</span>(<span class="t">AnyLanguageModelClient</span>())
+    .<span class="f">byokProviders</span>(builtins + [.appleFoundationModels, .mlx, .llama])</code></pre></div>
+      <ul class="bul">
+        <li><code>.mlx</code> — the selected model id is a Hugging Face MLX repo (e.g.
+          <code>mlx-community/Qwen3-0.6B-4bit</code>), downloaded on first use.</li>
+        <li><code>.llama</code> — point the <code>modelPath</code> field at a local <code>.gguf</code> file.</li>
+      </ul>
+      <p>With neither trait enabled (the default), these providers report that the backend isn't
+        compiled in, and nothing heavy is added to your dependency graph.</p>
+    </section>
+
+    <!-- CUSTOM PROVIDER -->
+    <section id="custom-provider">
+      <h2>Adding a provider</h2>
+      <p>Because the catalog is data-driven, adding a provider is usually just an entry in
+        <code>Sources/BYOKitCore/Resources/providers.json</code> — no UI code. Any OpenAI-compatible
+        endpoint works out of the box with <code>"apiFormat": "openai"</code>.</p>
+      <div class="codeblock"><span class="lang">json</span><button class="copy">Copy</button><pre><code>{
+  <span class="s">"id"</span>: <span class="s">"together"</span>,
+  <span class="s">"displayName"</span>: <span class="s">"Together AI"</span>,
+  <span class="s">"kind"</span>: <span class="s">"cloud"</span>,
+  <span class="s">"apiFormat"</span>: <span class="s">"openai"</span>,
+  <span class="s">"appearance"</span>: { <span class="s">"monogram"</span>: <span class="s">"TG"</span>, <span class="s">"tintHex"</span>: <span class="s">"#0F6FFF"</span> },
+  <span class="s">"defaultBaseURL"</span>: <span class="s">"https://api.together.xyz/v1"</span>,
+  <span class="s">"allowsCustomBaseURL"</span>: <span class="k">true</span>,
+  <span class="s">"credential"</span>: {
+    <span class="s">"requiresAPIKey"</span>: <span class="k">true</span>,
+    <span class="s">"keyDisplayName"</span>: <span class="s">"API Key"</span>,
+    <span class="s">"validation"</span>: { <span class="s">"minLength"</span>: <span class="n">20</span> }
+  },
+  <span class="s">"onboarding"</span>: {
+    <span class="s">"consoleURL"</span>: <span class="s">"https://api.together.xyz/settings/api-keys"</span>,
+    <span class="s">"steps"</span>: [
+      { <span class="s">"id"</span>: <span class="n">1</span>, <span class="s">"text"</span>: <span class="s">"Sign in and open the API keys page."</span> }
+    ]
+  },
+  <span class="s">"models"</span>: {
+    <span class="s">"supportsDynamicListing"</span>: <span class="k">true</span>,
+    <span class="s">"presets"</span>: [
+      { <span class="s">"id"</span>: <span class="s">"meta-llama/Llama-3.3-70B-Instruct-Turbo"</span>, <span class="s">"displayName"</span>: <span class="s">"Llama 3.3 70B"</span> }
+    ]
+  }
+}</code></pre></div>
+      <p>Prefer not to fork? Build a <code>Provider</code> in Swift and pass it through
+        <code>.byokProviders(builtins + [myProvider])</code>, or host a remote catalog (next section).</p>
+    </section>
+
+    <!-- CUSTOM CLIENT -->
+    <section id="custom-client">
+      <h2>Custom LLMClient</h2>
+      <p>To route requests through your own engine — a proxy, an SDK, a mock — conform to
+        <code>LLMClient</code> and inject it with <code>.byokClient(_:)</code>. You get streaming for
+        free via the protocol's default; override <code>streamComplete</code> only if your engine
+        streams natively.</p>
+      <div class="codeblock"><span class="lang">swift</span><button class="copy">Copy</button><pre><code><span class="k">struct</span> <span class="t">MyClient</span>: <span class="t">LLMClient</span> {
+    <span class="k">func</span> <span class="f">validate</span>(_ r: <span class="t">ResolvedConfiguration</span>) <span class="k">async throws</span> -&gt; <span class="t">ValidationResult</span> {
+        .<span class="k">init</span>(ok: <span class="k">true</span>, latency: <span class="n">0.1</span>)
+    }
+    <span class="k">func</span> <span class="f">listModels</span>(_ r: <span class="t">ResolvedConfiguration</span>) <span class="k">async throws</span> -&gt; [<span class="t">ModelInfo</span>] { [] }
+    <span class="k">func</span> <span class="f">complete</span>(_ req: <span class="t">CompletionRequest</span>, with r: <span class="t">ResolvedConfiguration</span>) <span class="k">async throws</span> -&gt; <span class="t">CompletionResponse</span> {
+        <span class="c">// call your backend with req.messages, r.modelID, r.apiKey …</span>
+        .<span class="k">init</span>(text: <span class="s">"…"</span>)
+    }
+    <span class="c">// streamComplete inherited — falls back to complete()</span>
+}</code></pre></div>
+    </section>
+
+    <!-- OTA -->
+    <section id="ota">
+      <h2>Remote catalog (OTA)</h2>
+      <p>The registry can be refreshed from a remote JSON without an app update — useful for adding
+        providers or models between releases. The update is only applied if its <code>version</code>
+        is newer than the built-in bundle; on any failure the built-in catalog is kept.</p>
+      <div class="codeblock"><span class="lang">swift</span><button class="copy">Copy</button><pre><code><span class="k">let</span> url = <span class="t">URL</span>(string: <span class="s">"https://example.com/byokit/providers.json"</span>)!
+<span class="k">let</span> newVersion = <span class="k">try await</span> <span class="t">ProviderRegistry</span>.shared.<span class="f">loadRemote</span>(from: url)</code></pre></div>
+    </section>
+
+    <!-- ARCHITECTURE -->
+    <section id="architecture">
+      <h2>Architecture</h2>
+      <p>Layered, so you depend on only what you use. <code>BYOKitCore</code> has zero third-party
+        dependencies, and nothing pulls in a heavy SDK unless you opt in.</p>
+      <div class="tablewrap">
+      <table>
+        <tr><th>Target</th><th>Role</th><th>Depends on</th></tr>
+        <tr><td><code>BYOKitCore</code></td><td>Models, provider registry, onboarding metadata, providers.json</td><td>—</td></tr>
+        <tr><td><code>BYOKitStore</code></td><td>Keychain credential store + configuration persistence</td><td>Core</td></tr>
+        <tr><td><code>BYOKitClient</code></td><td>LLMClient protocol + DefaultLLMClient (URLSession)</td><td>Core</td></tr>
+        <tr><td><code>BYOKitUI</code></td><td>SwiftUI components</td><td>Core · Store · Client</td></tr>
+        <tr><td><code>BYOKit</code></td><td>Umbrella re-export</td><td>all</td></tr>
+        <tr><td><code>BYOKitClientAnyLanguageModel</code></td><td>Optional on-device adapter (Apple FM + MLX / llama.cpp via traits)</td><td>Core · Client · AnyLanguageModel</td></tr>
+      </table>
+      </div>
+    </section>
+
+    <!-- TESTING -->
+    <section id="testing">
+      <h2>Testing</h2>
+      <p>Run the suite with <code>swift test</code>. It covers the registry, key validation, Keychain
+        round-trips, the store, all four API formats (via a stubbed <code>URLProtocol</code>),
+        streaming, and the AnyLanguageModel adapter's delegation. Set
+        <code>ROCKY_OPENAI_APIKEY</code> to also run the live OpenAI smoke tests (skipped otherwise).</p>
+      <p>For previews and unit tests, construct a store with in-memory storage:</p>
+      <div class="codeblock"><span class="lang">swift</span><button class="copy">Copy</button><pre><code><span class="k">let</span> store = <span class="t">ConfigurationStore</span>(credentials: <span class="t">InMemoryCredentialStore</span>())</code></pre></div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq">
+      <h2>FAQ</h2>
+      <h3>Where are API keys stored?</h3>
+      <p>In the system Keychain via <code>KeychainCredentialStore</code>. The UI never shows them in
+        plain text, and removing a configuration deletes its secrets.</p>
+      <h3>Do I have to use DefaultLLMClient?</h3>
+      <p>No. It's the convenient default, but any <code>LLMClient</code> conformer works — see
+        <a href="#custom-client">Custom LLMClient</a>.</p>
+      <h3>Can I support a provider that isn't built in?</h3>
+      <p>Yes — add a <code>providers.json</code> entry, build a <code>Provider</code> in Swift, or
+        host a <a href="#ota">remote catalog</a>. Any OpenAI-compatible API works with no code.</p>
+      <h3>Does the base library pull in heavy dependencies?</h3>
+      <p>No. <code>BYOKitCore</code> and the umbrella <code>BYOKit</code> are dependency-free. Only the
+        optional on-device adapter adds one, and its MLX/llama.cpp backends are behind opt-in traits.</p>
+      <h3>How do I run the demo app?</h3>
+      <div class="codeblock"><span class="lang">bash</span><button class="copy">Copy</button><pre><code>cd Example
+xcodegen generate     <span class="c"># brew install xcodegen</span>
+open BYOKitDemo.xcodeproj</code></pre></div>
+    </section>
+
+    <footer>
+      <p><strong>BYOKit</strong> — MIT licensed · <a href="https://github.com/everettjf/BYOKit">everettjf/BYOKit</a>
+        · <a href="index.html">Home</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+  // Copy buttons
+  document.querySelectorAll('.codeblock').forEach(function(block){
+    var btn = block.querySelector('.copy');
+    var code = block.querySelector('code');
+    if(!btn || !code) return;
+    btn.addEventListener('click', function(){
+      navigator.clipboard.writeText(code.innerText).then(function(){
+        var old = btn.textContent; btn.textContent = 'Copied';
+        setTimeout(function(){ btn.textContent = old; }, 1200);
+      });
+    });
+  });
+
+  // Scrollspy
+  var links = Array.prototype.slice.call(document.querySelectorAll('aside a[href^="#"]'));
+  var map = {};
+  links.forEach(function(a){ var id = a.getAttribute('href').slice(1); var el = document.getElementById(id); if(el) map[id] = a; });
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        links.forEach(function(l){ l.classList.remove('active'); });
+        var a = map[e.target.id];
+        if(a){ a.classList.add('active'); }
+      }
+    });
+  }, { rootMargin: '-64px 0px -70% 0px', threshold: 0 });
+  Object.keys(map).forEach(function(id){ var el = document.getElementById(id); if(el) observer.observe(el); });
+
+  // Mobile sidebar
+  var sidebar = document.getElementById('sidebar');
+  var menuBtn = document.getElementById('menuBtn');
+  if(menuBtn){ menuBtn.addEventListener('click', function(){ sidebar.classList.toggle('open'); }); }
+  if(sidebar){ sidebar.addEventListener('click', function(e){ if(e.target.tagName === 'A') sidebar.classList.remove('open'); }); }
+</script>
+</body>
+</html>

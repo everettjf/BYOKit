@@ -13,7 +13,7 @@ A Swift Package that gives any **iOS / iPadOS / macOS** app a production-grade
 [![CI](https://github.com/everettjf/BYOKit/actions/workflows/ci.yml/badge.svg)](https://github.com/everettjf/BYOKit/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-black)](LICENSE)
 
-**[📖 Documentation &amp; site →](https://everettjf.github.io/BYOKit/)**
+**[🏠 Site](https://everettjf.github.io/BYOKit/) &nbsp;·&nbsp; [📖 Full guide →](https://everettjf.github.io/BYOKit/guide.html)**
 
 <img src="Example/screenshots/ios-2-list.png" width="220">
 <img src="Example/screenshots/ios-4-form.png" width="220">
@@ -60,9 +60,18 @@ onboarding guide.
 
 ## Install
 
+**Xcode** → *File ▸ Add Package Dependencies…* → paste
+`https://github.com/everettjf/BYOKit` → choose **Up to Next Major Version**
+(Xcode fills in the latest release for you).
+
+**Package.swift**
+
 ```swift
 .package(url: "https://github.com/everettjf/BYOKit", from: "1.0.0")
 ```
+
+> `from: "1.0.0"` is a *floor*, not a pin — SwiftPM always resolves the newest
+> compatible release, so this line never needs editing when a new version ships.
 
 Add the `BYOKit` product (umbrella). For just the data layer, depend on
 `BYOKitCore`; for just the UI, `BYOKitUI`.
@@ -163,7 +172,7 @@ GGUF** models — gated behind BYOKit traits so the heavy backends are only pull
 in when you ask for them:
 
 ```swift
-.package(url: "https://github.com/everettjf/BYOKit", from: "1.2.0",
+.package(url: "https://github.com/everettjf/BYOKit", from: "1.0.0",
          traits: ["MLX", "Llama"])     // enable the backends you want
 ```
 
@@ -210,20 +219,20 @@ open BYOKitDemo.xcodeproj
 swift test
 ```
 
-35 tests cover the registry, key validation, Keychain round-trips, the store,
-all four API formats (via a stubbed `URLProtocol`), and the AnyLanguageModel
-adapter's delegation. Set `ROCKY_OPENAI_APIKEY` to also run two live OpenAI smoke
-tests (skipped otherwise). The package is build-verified on macOS and the
-iOS/iPadOS simulator SDKs.
+The test suite covers the registry, key validation, Keychain round-trips, the
+store, all four API formats (via a stubbed `URLProtocol`), streaming, and the
+AnyLanguageModel adapter's delegation. Set `ROCKY_OPENAI_APIKEY` to also run two
+live OpenAI smoke tests (skipped otherwise). The package is build-verified on
+macOS and the iOS/iPadOS simulator SDKs.
 
 ## Roadmap
 
 - [x] **M1/M2** — Core models, Keychain store, URLSession client, full SwiftUI configuration UI.
 - [x] **M3** — Optional `AnyLanguageModel` adapter (on-device Apple Foundation Models) behind `LLMClient`.
 - [x] MLX / llama.cpp local models via opt-in BYOKit traits.
-- [ ] Streaming completions; usage/quota hints.
+- [x] **M4** — Streaming completions + English / Simplified Chinese localization.
+- [ ] Usage / quota hints.
 - [ ] DocC API reference on the docs site.
-- [ ] Localization (zh-Hans first).
 
 ## Contributing
 
